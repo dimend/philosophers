@@ -1,10 +1,24 @@
+# **************************************************************************** #
+#                                                                              #
+#                                                         :::      ::::::::    #
+#    Makefile                                           :+:      :+:    :+:    #
+#                                                     +:+ +:+         +:+      #
+#    By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+         #
+#                                                 +#+#+#+#+#+   +#+            #
+#    Created: 2025/04/16 16:45:02 by dimendon          #+#    #+#              #
+#    Updated: 2025/04/29 15:26:52 by dimendon         ###   ########.fr        #
+#                                                                              #
+# **************************************************************************** #
+
 CC = cc
 CFLAGS = -Wall -Wextra -Werror -g -I./includes
 
 TARGET = philo
 OBJ_PATH = obj/
 
-SRCS = src/main.c
+SRCS = 	src/main.c \
+		src/validations.c \
+		src/init.c
 
 OBJS = $(SRCS:src/%.c=$(OBJ_PATH)%.o)
 HEADERS = includes/philo.h

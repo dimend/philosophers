@@ -5,8 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/04/14 16:16:32 by dimendon          #+#    #+#             */
-/*   Updated: 2025/04/14 18:31:40 by dimendon         ###   ########.fr       */
+/*   Created: 2025/04/29 15:22:30 by dimendon          #+#    #+#             */
+/*   Updated: 2025/04/29 15:35:58 by dimendon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,13 +49,28 @@ A death must be displayed within 10 ms
 
 #include "philo.h"
 
+void error(char *message)
+{
+    perror(message);
+    exit(EXIT_FAILURE);
+}
+
 int main(int argc, char **argv)
 {
-    
-    if(argc == 5 || argc == 6)
+    if ((argc == 5 || argc == 6) && check_params(argv) == 0)
     {
-        printf("test %s \n", argv[1]);  
+        init_threads(argv);
+        while (i < n_philo)
+        {
+            pthread_join(threads[i], NULL);
+            i++;
+        }
+        free(threads);
     }
     else
+    {
         printf("./philo [nbr_of_philosophers] [t_t_die] [t_t_eat] [t_t_sleep] [(optional)[nbr_times_philo_eat]]\n");
+    }
+
+    return 0;
 }
