@@ -25,18 +25,18 @@
 
 typedef struct s_philo
 {
-    int t_nbr;
+    int t_id;
     int tt_die;
     int tt_eat;
     int tt_sleep;
+    pthread_t thread;
+    pthread_mutex_t fork;
+    struct s_philo *next;
 } t_philo;
-       
-typedef struct s_table
-{
-    t_philo *philo;
-}t_table;
 
 short int   check_params(char **argv);
 int         ft_atoi(const char *str);
+t_philo     *init_philos(char **argv);
+void        error(char *message);
 
 #endif
