@@ -49,6 +49,30 @@ A death must be displayed within 10 ms
 
 #include "philo.h"
 
+void join_free(t_philo *head_philo, int n_philo)
+{
+    int i;
+    t_philo *current_philo;
+    t_philo *next_philo;
+
+    i = -1;
+    current_philo = head_philo;
+    while (++i < n_philo)
+    {
+        pthread_join(current_philo->thread, NULL);
+        current_philo = current_philo->next;
+    }
+    i = -1;
+    current_philo = head_philo;
+    while (++i < n_philo)
+    {
+        next_philo = current_philo->next;
+        pthread_mutex_destroy(&current_philo->fork);
+        free(current_philo);
+        current_philo = next_philo;
+    }
+}
+
 void error(char *message)
 {
     perror(message);
@@ -58,30 +82,12 @@ void error(char *message)
 int main(int argc, char **argv)
 {
     t_philo *head_philo;
-    t_philo *current_philo;
-    int n_philo;
-    int i;
 
-    i = -1;
+    head_philo = NULL;
     if ((argc == 5 || argc == 6) && check_params(argv) == 0)
     {
-        n_philo = ft_atoi(argv[1]);
-        head_philo = init_philos(argv);
-        current_philo = head_philo;
-        while (++i < n_philo)
-        {
-            pthread_join(current_philo->thread, NULL);
-            current_philo = current_philo->next;
-        }
-        i = -1;
-        current_philo = head_philo;
-        while (++i < n_philo)
-        {
-            current_philo = current_philo->next;
-            pthread_mutex_destroy(&current_philo->fork);
-            free(head_philo);
-            head_philo = current_philo;
-        }
+        head_philo = init_philos(argv, ft_atoi(argv[1]));
+        join_free(head_philo, ft_atoi(argv[1]));
     }
     else
     {
