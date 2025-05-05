@@ -6,7 +6,7 @@
 /*   By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/29 15:24:52 by dimendon          #+#    #+#             */
-/*   Updated: 2025/04/29 15:50:57 by dimendon         ###   ########.fr       */
+/*   Updated: 2025/05/05 16:44:44 by dimendon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,11 +15,19 @@
 void *routine(void *arg)
 {
     t_philo *philo = (t_philo *)arg;
-    printf("Philo ID: %d\n", philo->t_id);
-    printf("Time to die: %d\n", philo->tt_die);
+
+    pthread_mutex_lock(&philo->fork);
+    printf("%d has taken a fork\n", philo->t_id);
+    pthread_mutex_lock(&philo->next->fork);
+    
+
+    pthread_mutex_unlock(&philo->fork);
+    printf("%d has dropped a fork\n", philo->t_id);
+    pthread_mutex_unlock(&philo->next->fork); 
+    
+/*     printf("Time to die: %d\n", philo->tt_die);
     printf("Time to eat: %d\n", philo->tt_eat);
-    printf("Time to sleep: %d\n", philo->tt_sleep);
-    free(philo);
+    printf("Time to sleep: %d\n", philo->tt_sleep); */
     return (NULL);
 }
 void init_values(t_philo *philo,  int n_philo, char **argv)
@@ -57,3 +65,4 @@ t_philo *init_philos(char **argv, int n_philo)
         prev->next = head;
     return (head);
 }
+
