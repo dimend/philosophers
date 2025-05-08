@@ -38,5 +38,6 @@ short int   check_params(char **argv);
 int         ft_atoi(const char *str);
 t_philo     *init_philos(char **argv, int n_philos);
 void        error(char *message);
+long        get_time_ms(void);
 
 #endif

@@ -18,6 +18,7 @@ OBJ_PATH = obj/
 
 SRCS = 	src/main.c \
 		src/validations.c \
+		src/utils.c \
 		src/init.c
 
 OBJS = $(SRCS:src/%.c=$(OBJ_PATH)%.o)

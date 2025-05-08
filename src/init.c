@@ -16,20 +16,28 @@ void *routine(void *arg)
 {
     t_philo *philo = (t_philo *)arg;
 
-    pthread_mutex_lock(&philo->fork);
-    printf("%d has taken a fork\n", philo->t_id);
-    pthread_mutex_lock(&philo->next->fork);
-    
+    if (philo->t_id % 2 == 0)
+    {
+        pthread_mutex_lock(&philo->fork);
+        printf("%d has taken a fork\n", philo->t_id);
+        pthread_mutex_lock(&philo->next->fork);
+        printf("%d has taken a fork\n", philo->t_id);
+    }
+    else
+    {
+        pthread_mutex_lock(&philo->next->fork);
+        printf("%d has taken a fork\n", philo->t_id);
+        pthread_mutex_lock(&philo->fork);
+        printf("%d has taken a fork\n", philo->t_id);
+    }
 
+    printf("%d has dropped a fork\n", philo->t_id);
     pthread_mutex_unlock(&philo->fork);
     printf("%d has dropped a fork\n", philo->t_id);
-    pthread_mutex_unlock(&philo->next->fork); 
-    
-/*     printf("Time to die: %d\n", philo->tt_die);
-    printf("Time to eat: %d\n", philo->tt_eat);
-    printf("Time to sleep: %d\n", philo->tt_sleep); */
+    pthread_mutex_unlock(&philo->next->fork);
     return (NULL);
 }
+
 void init_values(t_philo *philo,  int n_philo, char **argv)
 {
     philo->t_id = n_philo;
