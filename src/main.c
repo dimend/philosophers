@@ -6,7 +6,7 @@
 /*   By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/29 15:22:30 by dimendon          #+#    #+#             */
-/*   Updated: 2025/04/29 15:35:58 by dimendon         ###   ########.fr       */
+/*   Updated: 2025/05/09 15:12:11 by dimendon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@ cant eat and think/sleep or vice-versa
 theres forks and they are as many as philosophers
 when philosophers eat they need 2 forks
 when they finish eating they put them back and sleep
-when they awake, they start thinking
+when they wake up, they start thinking
 
 the sim stops when one of them dies
 
@@ -54,14 +54,28 @@ void join_free(t_philo *head_philo, int n_philo)
     int i;
     t_philo *current_philo;
     t_philo *next_philo;
+    void *status;
 
     i = -1;
     current_philo = head_philo;
+
     while (++i < n_philo)
     {
-        pthread_join(current_philo->thread, NULL);
+        pthread_join(current_philo->thread, &status);
+        if ((int)status == -1)
+        {
+            printf("Someone died.\n");
+            t_philo *test = head_philo;
+            while (test)
+            {
+                test->is_dead = 1;
+                test = test->next;
+            }
+            break;
+        }
         current_philo = current_philo->next;
     }
+
     i = -1;
     current_philo = head_philo;
     while (++i < n_philo)
