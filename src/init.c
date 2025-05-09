@@ -6,7 +6,7 @@
 /*   By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/29 15:24:52 by dimendon          #+#    #+#             */
-/*   Updated: 2025/05/09 15:13:41 by dimendon         ###   ########.fr       */
+/*   Updated: 2025/05/09 18:18:14 by dimendon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,61 +15,28 @@
 void *routine(void *arg)
 {
     t_philo *philo = (t_philo *)arg;
-    long timestamp;
-    long death;
-    int eat;
     
-    eat = 0;
     while (1)
     {
-        if ((philo->max_eat != -1 && eat >= philo->max_eat) || philo->is_dead)
+        pthread_mutex_lock(philo->is_dead_mutex);
+        if ((philo->max_eat != -1 && philo->ate >= philo->max_eat) || *(philo->is_dead))
+        {
+            pthread_mutex_unlock(philo->is_dead_mutex);
             break;
-
-        timestamp = get_time();
-        death = timestamp - philo->last_meal;
-        if (death > philo->tt_die)
-        {
-            printf("[%ld ms] %d has died\n", timestamp, philo->t_id);
-            philo->is_dead = 1;
-            return (void *)-1;
         }
-
-        if (philo->t_id % 2 == 0)
-        {
-            pthread_mutex_lock(&philo->fork);
-            timestamp = get_time() - philo->start_time;
-            printf("[%ld ms] %d has taken a fork\n", timestamp, philo->t_id);
-
-            pthread_mutex_lock(&philo->next->fork);
-            timestamp = get_time() - philo->start_time;
-            printf("[%ld ms] %d has taken a fork\n", timestamp, philo->t_id);
-        }
-        else
-        {
-            pthread_mutex_lock(&philo->next->fork);
-            timestamp = get_time() - philo->start_time;
-            printf("[%ld ms] %d has taken a fork\n", timestamp, philo->t_id);
-
-            pthread_mutex_lock(&philo->fork);
-            timestamp = get_time() - philo->start_time;
-            printf("[%ld ms] %d has taken a fork\n", timestamp, philo->t_id);
-        }
-
-        timestamp = get_time() - philo->start_time;
-        printf("[%ld ms] %d is eating\n", timestamp, philo->t_id);
-        usleep(philo->tt_eat * 1000);
-        eat++;
-        philo->last_meal = get_time();
-
+        pthread_mutex_unlock(philo->is_dead_mutex);
+        
+        take_fork(philo);
+        eating(philo);
+        
         pthread_mutex_unlock(&philo->fork);
         pthread_mutex_unlock(&philo->next->fork);
-
-        timestamp = get_time() - philo->start_time;
-        printf("[%ld ms] %d is sleeping\n", timestamp, philo->t_id);
-        usleep(philo->tt_sleep * 1000);
-
-        timestamp = get_time() - philo->start_time;
-        printf("[%ld ms] %d is thinking\n", timestamp, philo->t_id);
+        
+        sleeping(philo); 
+        thinking(philo);
+        
+        if (death(philo) == -1)
+            break;
     }
     return (NULL);
 }
@@ -87,26 +54,31 @@ void init_values(t_philo *philo,  int n_philo, char **argv, long start_time)
         philo->max_eat = ft_atoi(argv[5]);
     else
         philo->max_eat = -1;
+    philo->ate = 0;
     pthread_mutex_init(&philo->fork, NULL);
     philo->next = NULL;
 }
 
-t_philo *init_philos(char **argv, int n_philo)
+t_philo *init_philos(char **argv, int n_philo, long start_time)
 {
-    int i;
     t_philo *head = NULL;
     t_philo *prev = NULL;
-    long start_time;
-    
-    start_time = get_time();
-    
-    i = -1;
-    while (++i < n_philo)
+    t_philo *philo = NULL;
+    int *shared_is_dead = malloc(sizeof(int));
+    pthread_mutex_t *shared_mutex = malloc(sizeof(pthread_mutex_t));
+    *shared_is_dead = 0;
+    pthread_mutex_init(shared_mutex, NULL);
+
+    while (n_philo-- > 0)
     {
-        t_philo *philo = malloc(sizeof(t_philo));
+        philo = malloc(sizeof(t_philo));
         if (!philo)
             error("Philo malloc fail");
-        init_values(philo, i, argv, start_time);
+        init_values(philo, n_philo, argv, start_time);
+
+        philo->is_dead = shared_is_dead;
+        philo->is_dead_mutex = shared_mutex;
+        
         if (!head)
             head = philo;
         if (prev)

@@ -6,7 +6,7 @@
 /*   By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/09 17:55:15 by dimendon          #+#    #+#             */
-/*   Updated: 2025/05/09 13:55:16 by dimendon         ###   ########.fr       */
+/*   Updated: 2025/05/09 18:21:09 by dimendon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,18 +30,26 @@ typedef struct s_philo
     int tt_eat;
     int tt_sleep;
     int max_eat;
+    int ate;
     long start_time;
     long last_meal;
-    int is_dead;
     pthread_t thread;
     pthread_mutex_t fork;
     struct s_philo *next;
+
+    int *is_dead;
+    pthread_mutex_t *is_dead_mutex;
 } t_philo;
 
 short int   check_params(char **argv);
 int         ft_atoi(const char *str);
-t_philo     *init_philos(char **argv, int n_philos);
+t_philo     *init_philos(char **argv, int n_philos, long start_time);
 void        error(char *message);
 long        get_time(void);
+short int   take_fork(t_philo *philo);
+short int   eating(t_philo *philo);
+short int   sleeping(t_philo *philo);
+short int   thinking(t_philo *philo);
+short int   death(t_philo *philo);
 
 #endif

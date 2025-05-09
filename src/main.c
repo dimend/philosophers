@@ -6,7 +6,7 @@
 /*   By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/29 15:22:30 by dimendon          #+#    #+#             */
-/*   Updated: 2025/05/09 15:12:11 by dimendon         ###   ########.fr       */
+/*   Updated: 2025/05/09 18:28:24 by dimendon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,23 +56,21 @@ void join_free(t_philo *head_philo, int n_philo)
     t_philo *next_philo;
     void *status;
 
+    int *shared_is_dead = head_philo->is_dead;
+    
     i = -1;
     current_philo = head_philo;
 
     while (++i < n_philo)
     {
-        pthread_join(current_philo->thread, &status);
-        if ((int)status == -1)
+        pthread_mutex_lock(head_philo->is_dead_mutex);
+        if (*shared_is_dead)
         {
+            pthread_mutex_unlock(head_philo->is_dead_mutex);
             printf("Someone died.\n");
-            t_philo *test = head_philo;
-            while (test)
-            {
-                test->is_dead = 1;
-                test = test->next;
-            }
             break;
         }
+        pthread_mutex_unlock(head_philo->is_dead_mutex);
         current_philo = current_philo->next;
     }
 
@@ -80,9 +78,11 @@ void join_free(t_philo *head_philo, int n_philo)
     current_philo = head_philo;
     while (++i < n_philo)
     {
+        pthread_join(current_philo->thread, &status);
         next_philo = current_philo->next;
         pthread_mutex_destroy(&current_philo->fork);
         free(current_philo);
+
         current_philo = next_philo;
     }
 }
@@ -96,11 +96,13 @@ void error(char *message)
 int main(int argc, char **argv)
 {
     t_philo *head_philo;
-
+    long start_time;
+    
+    start_time = get_time();
     head_philo = NULL;
     if ((argc == 5 || argc == 6) && check_params(argv) == 0)
     {
-        head_philo = init_philos(argv, ft_atoi(argv[1]));
+        head_philo = init_philos(argv, ft_atoi(argv[1]), start_time);
         join_free(head_philo, ft_atoi(argv[1]));
     }
     else
