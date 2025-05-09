@@ -9,12 +9,11 @@ short int death(t_philo *philo)
     {
         printf("[%ld ms] %d has died\n", timestamp, philo->t_id);
 
-        // Lock the death mutex and mark this philosopher as dead
         pthread_mutex_lock(philo->is_dead_mutex);
         *(philo->is_dead) = 1;
         pthread_mutex_unlock(philo->is_dead_mutex);
 
-        return (-1); // Return -1 to indicate the philosopher has died
+        return (-1);
     }
     return (0);
 }
