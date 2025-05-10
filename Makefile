@@ -32,7 +32,7 @@ $(OBJ_PATH)%.o: src/%.c $(HEADERS)
 all: $(TARGET)
 
 $(TARGET): $(OBJS)
-	$(CC) $(CFLAGS) $(OBJS) -o $(TARGET)
+	$(CC) $(CFLAGS) $(OBJS) -o $(TARGET) -pthread
 
 clean:
 	rm -f $(OBJS)

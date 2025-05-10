@@ -56,21 +56,12 @@ void join_free(t_philo *head_philo, int n_philo)
     t_philo *next_philo;
     void *status;
 
-    int *shared_is_dead = head_philo->is_dead;
-    
     i = -1;
     current_philo = head_philo;
 
     while (++i < n_philo)
     {
-        pthread_mutex_lock(head_philo->is_dead_mutex);
-        if (*shared_is_dead)
-        {
-            pthread_mutex_unlock(head_philo->is_dead_mutex);
-            printf("Someone died.\n");
-            break;
-        }
-        pthread_mutex_unlock(head_philo->is_dead_mutex);
+        pthread_join(current_philo->thread, &status);
         current_philo = current_philo->next;
     }
 
@@ -78,14 +69,13 @@ void join_free(t_philo *head_philo, int n_philo)
     current_philo = head_philo;
     while (++i < n_philo)
     {
-        pthread_join(current_philo->thread, &status);
         next_philo = current_philo->next;
         pthread_mutex_destroy(&current_philo->fork);
         free(current_philo);
-
         current_philo = next_philo;
     }
 }
+
 
 void error(char *message)
 {
@@ -109,6 +99,5 @@ int main(int argc, char **argv)
     {
         printf("./philo [nbr_of_philosophers] [t_t_die] [t_t_eat] [t_t_sleep] [(optional)[nbr_times_philo_eat]]\n");
     }
-
     return (0);
 }

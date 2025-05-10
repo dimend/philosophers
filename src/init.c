@@ -16,58 +16,40 @@ void *routine(void *arg)
 {
     t_philo *philo = (t_philo *)arg;
 
-    while (1)
+    while (!is_anyone_dead(philo))
     {
-        pthread_mutex_lock(philo->is_dead_mutex);
-        if (*(philo->is_dead))  // If the philosopher is dead, stop the loop
-        {
-            pthread_mutex_unlock(philo->is_dead_mutex);
+        if (philo->max_eat != -1 && philo->ate >= philo->max_eat)
             break;
-        }
-        pthread_mutex_unlock(philo->is_dead_mutex);
 
-        take_fork(philo);  // Philosopher tries to take forks
+        if (is_anyone_dead(philo))
+            break;
 
-        pthread_mutex_lock(philo->is_dead_mutex);
-        if (*(philo->is_dead))  // Check if dead after taking forks
+        if (take_fork(philo))
         {
-            pthread_mutex_unlock(philo->is_dead_mutex);
             pthread_mutex_unlock(&philo->fork);
             pthread_mutex_unlock(&philo->next->fork);
             break;
         }
-        pthread_mutex_unlock(philo->is_dead_mutex);
 
-        eating(philo);
+        if (eating(philo))
+        {
+            pthread_mutex_unlock(&philo->fork);
+            pthread_mutex_unlock(&philo->next->fork);
+            break;
+        }
 
         pthread_mutex_unlock(&philo->fork);
         pthread_mutex_unlock(&philo->next->fork);
 
-        pthread_mutex_lock(philo->is_dead_mutex);
-        if (*(philo->is_dead))  // Check if dead after eating
-        {
-            pthread_mutex_unlock(philo->is_dead_mutex);
+        if (sleeping(philo))
             break;
-        }
-        pthread_mutex_unlock(philo->is_dead_mutex);
 
-        sleeping(philo);
-
-        pthread_mutex_lock(philo->is_dead_mutex);
-        if (*(philo->is_dead))  // Check if dead after sleeping
-        {
-            pthread_mutex_unlock(philo->is_dead_mutex);
+        if (thinking(philo))
             break;
-        }
-        pthread_mutex_unlock(philo->is_dead_mutex);
-
-        thinking(philo);
     }
 
-    return NULL;
+    return (NULL);
 }
-
-
 
 void init_values(t_philo *philo,  int n_philo, char **argv, long start_time)
 {
@@ -77,7 +59,6 @@ void init_values(t_philo *philo,  int n_philo, char **argv, long start_time)
     philo->tt_sleep = ft_atoi(argv[4]);
     philo->start_time = start_time;
     philo->last_meal = start_time;
-    philo->is_dead = 0;
     if (argv[5])
         philo->max_eat = ft_atoi(argv[5]);
     else
@@ -94,9 +75,9 @@ t_philo *init_philos(char **argv, int n_philo, long start_time)
     t_philo *philo = NULL;
     int *shared_is_dead = malloc(sizeof(int));
     pthread_mutex_t *shared_mutex = malloc(sizeof(pthread_mutex_t));
+
     *shared_is_dead = 0;
     pthread_mutex_init(shared_mutex, NULL);
-
     while (n_philo-- > 0)
     {
         philo = malloc(sizeof(t_philo));
