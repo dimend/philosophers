@@ -15,31 +15,59 @@
 void *routine(void *arg)
 {
     t_philo *philo = (t_philo *)arg;
-    
+
     while (1)
     {
         pthread_mutex_lock(philo->is_dead_mutex);
-        if ((philo->max_eat != -1 && philo->ate >= philo->max_eat) || *(philo->is_dead))
+        if (*(philo->is_dead))  // If the philosopher is dead, stop the loop
         {
             pthread_mutex_unlock(philo->is_dead_mutex);
             break;
         }
         pthread_mutex_unlock(philo->is_dead_mutex);
-        
-        take_fork(philo);
+
+        take_fork(philo);  // Philosopher tries to take forks
+
+        pthread_mutex_lock(philo->is_dead_mutex);
+        if (*(philo->is_dead))  // Check if dead after taking forks
+        {
+            pthread_mutex_unlock(philo->is_dead_mutex);
+            pthread_mutex_unlock(&philo->fork);
+            pthread_mutex_unlock(&philo->next->fork);
+            break;
+        }
+        pthread_mutex_unlock(philo->is_dead_mutex);
+
         eating(philo);
-        
+
         pthread_mutex_unlock(&philo->fork);
         pthread_mutex_unlock(&philo->next->fork);
-        
-        sleeping(philo); 
-        thinking(philo);
-        
-        if (death(philo) == -1)
+
+        pthread_mutex_lock(philo->is_dead_mutex);
+        if (*(philo->is_dead))  // Check if dead after eating
+        {
+            pthread_mutex_unlock(philo->is_dead_mutex);
             break;
+        }
+        pthread_mutex_unlock(philo->is_dead_mutex);
+
+        sleeping(philo);
+
+        pthread_mutex_lock(philo->is_dead_mutex);
+        if (*(philo->is_dead))  // Check if dead after sleeping
+        {
+            pthread_mutex_unlock(philo->is_dead_mutex);
+            break;
+        }
+        pthread_mutex_unlock(philo->is_dead_mutex);
+
+        thinking(philo);
     }
-    return (NULL);
+
+    return NULL;
 }
+
+
 
 void init_values(t_philo *philo,  int n_philo, char **argv, long start_time)
 {

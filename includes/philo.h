@@ -46,10 +46,11 @@ int         ft_atoi(const char *str);
 t_philo     *init_philos(char **argv, int n_philos, long start_time);
 void        error(char *message);
 long        get_time(void);
-short int   take_fork(t_philo *philo);
-short int   eating(t_philo *philo);
-short int   sleeping(t_philo *philo);
-short int   thinking(t_philo *philo);
-short int   death(t_philo *philo);
+void   take_fork(t_philo *philo);
+void   eating(t_philo *philo);
+void   sleeping(t_philo *philo);
+void   thinking(t_philo *philo);
+void   death(t_philo *philo);
+short int is_anyone_dead(t_philo *philo);
 
 #endif
