@@ -3,90 +3,65 @@
 short int is_anyone_dead(t_philo *philo)
 {
     short int dead;
+    long death_time;
 
     pthread_mutex_lock(philo->is_dead_mutex);
     dead = *(philo->is_dead);
     pthread_mutex_unlock(philo->is_dead_mutex);
-
     if (dead == 0)
     {
-        long timestamp = get_time() - philo->start_time;
-        long death_time = timestamp - (philo->last_meal - philo->start_time);
-
+        death_time = get_time() - philo->last_meal;
         if (death_time > philo->tt_die)
         {
-            printf("[%ld ms] %d has died\n", timestamp, philo->t_id);
-
-            pthread_mutex_lock(philo->is_dead_mutex);
-            *(philo->is_dead) = 1;
-            pthread_mutex_unlock(philo->is_dead_mutex);
-
+            safe_print(philo, NULL , death_time);
             dead = 1;
         }
     }
-
     return (dead);
 }
 
-short int take_fork(t_philo *philo)
+short int forks(t_philo *philo)
 {
     long timestamp;
 
+    if(philo->t_id % 2 == 0)
+        usleep(1000);
+    pthread_mutex_lock(&philo->fork);
+    timestamp = get_time() - philo->start_time;
     if (is_anyone_dead(philo))
+    {
+        pthread_mutex_unlock(&philo->fork);
         return (1);
-
-    if (philo->t_id % 2 == 0)
-    {
-        pthread_mutex_lock(&philo->fork);
-        timestamp = get_time() - philo->start_time;
-        printf("[%ld ms] %d has taken a fork\n", timestamp, philo->t_id);
-
-        if (is_anyone_dead(philo))
-        {
-            pthread_mutex_unlock(&philo->fork);
-            return (1);
-        }
-
-        pthread_mutex_lock(&philo->next->fork);
-        timestamp = get_time() - philo->start_time;
-        printf("[%ld ms] %d has taken a fork\n", timestamp, philo->t_id);
     }
-    else
+    safe_print(philo, "has taken a fork", timestamp);
+    if (philo == philo->next)
     {
-        pthread_mutex_lock(&philo->next->fork);
-        timestamp = get_time() - philo->start_time;
-        printf("[%ld ms] %d has taken a fork\n", timestamp, philo->t_id);
-
-        if (is_anyone_dead(philo))
-        {
-            pthread_mutex_unlock(&philo->next->fork);
-            return (1);
-        }
-
-        pthread_mutex_lock(&philo->fork);
-        timestamp = get_time() - philo->start_time;
-        printf("[%ld ms] %d has taken a fork\n", timestamp, philo->t_id);
+        safe_print(philo, NULL, timestamp);
+        pthread_mutex_unlock(&philo->fork);
+        return (1);
     }
-
+    pthread_mutex_lock(&philo->next->fork);
+    timestamp = get_time() - philo->start_time;
+    safe_print(philo, "has taken a fork", timestamp);
     return (0);
 }
 
 short int eating(t_philo *philo)
 {
     long timestamp = get_time() - philo->start_time;
-    long remaining_time = philo->tt_eat * 1000;
+    long remaining_time = philo->tt_eat * 500;
 
     if (is_anyone_dead(philo))
         return (1);
-    printf("[%ld ms] %d is eating\n", timestamp, philo->t_id);
+
+    safe_print(philo, "is eating", timestamp);
     while (remaining_time > 0)
     {
         if (is_anyone_dead(philo))
             return (1);
-        usleep(1000);
-        remaining_time -= 1000;
+        usleep(500);
+        remaining_time -= 500;
     }
-
     philo->ate++;
     philo->last_meal = get_time();
     return (0);
@@ -96,17 +71,19 @@ short int eating(t_philo *philo)
 short int sleeping(t_philo *philo)
 {
     long timestamp = get_time() - philo->start_time;
-    long remaining_time = philo->tt_sleep * 1000;
+    long remaining_time = philo->tt_sleep * 500;
 
     if (is_anyone_dead(philo))
         return (1);
-    printf("[%ld ms] %d is sleeping\n", timestamp, philo->t_id);
+
+    safe_print(philo, "is sleeping", timestamp);
     while (remaining_time > 0)
     {
         if (is_anyone_dead(philo))
             return (1);
-        usleep(1000);
-        remaining_time -= 1000;
+
+        usleep(500);
+        remaining_time -= 500;
     }
     return (0);
 }
@@ -118,6 +95,6 @@ short int thinking(t_philo *philo)
     if (is_anyone_dead(philo))
         return (1);
 
-    printf("[%ld ms] %d is thinking\n", timestamp, philo->t_id);
+    safe_print(philo, "is thinking", timestamp);
     return (0);
 }

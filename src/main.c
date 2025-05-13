@@ -6,7 +6,7 @@
 /*   By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/29 15:22:30 by dimendon          #+#    #+#             */
-/*   Updated: 2025/05/09 18:28:24 by dimendon         ###   ########.fr       */
+/*   Updated: 2025/05/13 19:09:23 by dimendon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,6 +65,11 @@ void join_free(t_philo *head_philo, int n_philo)
         current_philo = current_philo->next;
     }
 
+    if (head_philo->is_dead_mutex)
+        pthread_mutex_destroy(head_philo->is_dead_mutex);
+    free(head_philo->is_dead_mutex);
+    free(head_philo->is_dead);
+
     i = -1;
     current_philo = head_philo;
     while (++i < n_philo)
@@ -76,7 +81,6 @@ void join_free(t_philo *head_philo, int n_philo)
     }
 }
 
-
 void error(char *message)
 {
     perror(message);
@@ -85,19 +89,22 @@ void error(char *message)
 
 int main(int argc, char **argv)
 {
-    t_philo *head_philo;
-    long start_time;
+    t_philo         *head_philo;
+    long            start_time;
+    pthread_mutex_t print_mutex;
     
+    pthread_mutex_init(&print_mutex, NULL);
     start_time = get_time();
     head_philo = NULL;
     if ((argc == 5 || argc == 6) && check_params(argv) == 0)
     {
-        head_philo = init_philos(argv, ft_atoi(argv[1]), start_time);
+        head_philo = init_philos(argv, ft_atoi(argv[1]), start_time, &print_mutex);
         join_free(head_philo, ft_atoi(argv[1]));
     }
     else
     {
         printf("./philo [nbr_of_philosophers] [t_t_die] [t_t_eat] [t_t_sleep] [(optional)[nbr_times_philo_eat]]\n");
     }
+    
     return (0);
 }

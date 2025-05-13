@@ -6,7 +6,7 @@
 /*   By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/29 15:24:52 by dimendon          #+#    #+#             */
-/*   Updated: 2025/05/09 18:18:14 by dimendon         ###   ########.fr       */
+/*   Updated: 2025/05/13 19:17:33 by dimendon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,7 @@ void *routine(void *arg)
             pthread_mutex_unlock(&philo->next->fork);
             break;
         }
-
+        
         if (eating(philo))
         {
             pthread_mutex_unlock(&philo->fork);
@@ -43,7 +43,7 @@ void *routine(void *arg)
 
         if (sleeping(philo))
             break;
-
+            
         if (thinking(philo))
             break;
     }
@@ -65,14 +65,16 @@ void init_values(t_philo *philo,  int n_philo, char **argv, long start_time)
         philo->max_eat = -1;
     philo->ate = 0;
     pthread_mutex_init(&philo->fork, NULL);
+    
     philo->next = NULL;
 }
 
-t_philo *init_philos(char **argv, int n_philo, long start_time)
+t_philo *init_philos(char **argv, int n_philo, long start_time, pthread_mutex_t *print_mutex)
 {
     t_philo *head = NULL;
     t_philo *prev = NULL;
     t_philo *philo = NULL;
+    
     int *shared_is_dead = malloc(sizeof(int));
     pthread_mutex_t *shared_mutex = malloc(sizeof(pthread_mutex_t));
 
@@ -84,7 +86,7 @@ t_philo *init_philos(char **argv, int n_philo, long start_time)
         if (!philo)
             error("Philo malloc fail");
         init_values(philo, n_philo, argv, start_time);
-
+        philo->print_mutex = print_mutex;
         philo->is_dead = shared_is_dead;
         philo->is_dead_mutex = shared_mutex;
         

@@ -6,7 +6,7 @@
 /*   By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/09 17:55:15 by dimendon          #+#    #+#             */
-/*   Updated: 2025/05/09 18:21:09 by dimendon         ###   ########.fr       */
+/*   Updated: 2025/05/13 19:37:48 by dimendon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,18 +39,21 @@ typedef struct s_philo
 
     int *is_dead;
     pthread_mutex_t *is_dead_mutex;
+    pthread_mutex_t *print_mutex;
 } t_philo;
 
 short int   check_params(char **argv);
 int         ft_atoi(const char *str);
-t_philo     *init_philos(char **argv, int n_philos, long start_time);
+t_philo     *init_philos(char **argv, int n_philos, long start_time, pthread_mutex_t *print_mutex);
 void        error(char *message);
 long        get_time(void);
 short int   take_fork(t_philo *philo);
+short int   forks(t_philo *philo);
 short int   eating(t_philo *philo);
 short int   sleeping(t_philo *philo);
 short int   thinking(t_philo *philo);
 short int   is_anyone_dead(t_philo *philo);
-void *routine(void *arg);
+void        safe_print(t_philo *philo, const char *message, long timestamp);
+void        *routine(void *arg);
 
 #endif
