@@ -74,32 +74,40 @@ t_philo *init_philos(char **argv, int n_philo, long start_time, pthread_mutex_t 
     t_philo *head = NULL;
     t_philo *prev = NULL;
     t_philo *philo = NULL;
-    
+
     int *shared_is_dead = malloc(sizeof(int));
     pthread_mutex_t *shared_mutex = malloc(sizeof(pthread_mutex_t));
 
+    if (!shared_is_dead || !shared_mutex)
+        error("Shared resource allocation failed");
+
     *shared_is_dead = 0;
     pthread_mutex_init(shared_mutex, NULL);
+
     while (n_philo-- > 0)
     {
         philo = malloc(sizeof(t_philo));
         if (!philo)
             error("Philo malloc fail");
+
         init_values(philo, n_philo, argv, start_time);
         philo->print_mutex = print_mutex;
         philo->is_dead = shared_is_dead;
         philo->is_dead_mutex = shared_mutex;
-        
+
         if (!head)
             head = philo;
         if (prev)
             prev->next = philo;
+
         prev = philo;
-        if (pthread_create(&philo->thread, NULL, routine, (void *)philo) != 0)
-            error("Thread creation failed");
     }
-    if(prev)
+
+    if (prev)
         prev->next = head;
-    return (head);
+
+    return head;
 }
+
+
 

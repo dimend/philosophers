@@ -46,3 +46,18 @@ short int take_fork(t_philo *philo)
     return 0;
 }
 
+void start_threading(t_philo *head, int n_philo)
+{
+    t_philo *philo = head;
+    int i = 0;
+
+    while (i < n_philo)
+    {
+        if (pthread_create(&philo->thread, NULL, routine, (void *)philo) != 0)
+            error("Thread creation failed");
+        philo = philo->next;
+        i++;
+    }
+}
+
+

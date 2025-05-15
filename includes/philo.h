@@ -55,5 +55,6 @@ short int   thinking(t_philo *philo);
 short int   is_anyone_dead(t_philo *philo);
 void        safe_print(t_philo *philo, const char *message, long timestamp);
 void        *routine(void *arg);
+void        start_threading(t_philo *head, int n_philo);
 
 #endif

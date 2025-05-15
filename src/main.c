@@ -99,6 +99,7 @@ int main(int argc, char **argv)
     if ((argc == 5 || argc == 6) && check_params(argv) == 0)
     {
         head_philo = init_philos(argv, ft_atoi(argv[1]), start_time, &print_mutex);
+        start_threading(head_philo, ft_atoi(argv[1]));
         join_free(head_philo, ft_atoi(argv[1]));
     }
     else
