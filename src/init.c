@@ -6,7 +6,7 @@
 /*   By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/29 15:24:52 by dimendon          #+#    #+#             */
-/*   Updated: 2025/05/13 19:17:33 by dimendon         ###   ########.fr       */
+/*   Updated: 2025/05/16 17:40:54 by dimendon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,40 +16,35 @@ void *routine(void *arg)
 {
     t_philo *philo = (t_philo *)arg;
 
+    thinking(philo);
     while (!is_anyone_dead(philo))
     {
         if (philo->max_eat != -1 && philo->ate >= philo->max_eat)
             break;
-
         if (is_anyone_dead(philo))
             break;
-
-        if (take_fork(philo))
-        {
+        if (!take_fork(philo))
+        {   
+            if (eating(philo))
+            {
+                pthread_mutex_unlock(&philo->fork);
+                pthread_mutex_unlock(&philo->next->fork);
+                break;
+            }
+            philo->using_fork = 0;
             pthread_mutex_unlock(&philo->fork);
             pthread_mutex_unlock(&philo->next->fork);
-            break;
         }
-        
-        if (eating(philo))
-        {
-            pthread_mutex_unlock(&philo->fork);
-            pthread_mutex_unlock(&philo->next->fork);
+        else
             break;
-        }
-
-        pthread_mutex_unlock(&philo->fork);
-        pthread_mutex_unlock(&philo->next->fork);
-
         if (sleeping(philo))
             break;
-            
         if (thinking(philo))
             break;
     }
-
     return (NULL);
 }
+
 
 void init_values(t_philo *philo,  int n_philo, char **argv, long start_time)
 {
@@ -65,8 +60,10 @@ void init_values(t_philo *philo,  int n_philo, char **argv, long start_time)
         philo->max_eat = -1;
     philo->ate = 0;
     pthread_mutex_init(&philo->fork, NULL);
+    philo->using_fork = 1;
     
     philo->next = NULL;
+    philo->previous = NULL;
 }
 
 t_philo *init_philos(char **argv, int n_philo, long start_time, pthread_mutex_t *print_mutex)
@@ -98,15 +95,20 @@ t_philo *init_philos(char **argv, int n_philo, long start_time, pthread_mutex_t 
         if (!head)
             head = philo;
         if (prev)
+        {
             prev->next = philo;
+            philo->previous = prev;
+        }
 
         prev = philo;
     }
 
     if (prev)
+    {
         prev->next = head;
-
-    return head;
+        head->previous = prev;
+    }
+    return (head);
 }
 
 

@@ -24,14 +24,14 @@ void safe_print(t_philo *philo, const char *message, long timestamp)
         
     if (!message)
     {
-        printf("[%ld ms] %d has died\n", timestamp, philo->t_id);
+        printf("%ld %d died\n", timestamp, philo->t_id);
         pthread_mutex_lock(philo->is_dead_mutex);
         *(philo->is_dead) = 1;
         pthread_mutex_unlock(philo->is_dead_mutex);
         pthread_mutex_unlock(philo->print_mutex);
         return;
     }
-    printf("[%ld ms] %d %s\n", timestamp, philo->t_id, message);
+    printf("%ld %d %s\n", timestamp, philo->t_id, message);
     pthread_mutex_unlock(philo->print_mutex);
 }
 

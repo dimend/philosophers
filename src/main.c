@@ -6,7 +6,7 @@
 /*   By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/29 15:22:30 by dimendon          #+#    #+#             */
-/*   Updated: 2025/05/13 19:09:23 by dimendon         ###   ########.fr       */
+/*   Updated: 2025/05/16 17:37:11 by dimendon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,6 +67,7 @@ void join_free(t_philo *head_philo, int n_philo)
 
     if (head_philo->is_dead_mutex)
         pthread_mutex_destroy(head_philo->is_dead_mutex);
+        
     free(head_philo->is_dead_mutex);
     free(head_philo->is_dead);
 

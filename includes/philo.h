@@ -6,7 +6,7 @@
 /*   By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/09 17:55:15 by dimendon          #+#    #+#             */
-/*   Updated: 2025/05/13 19:37:48 by dimendon         ###   ########.fr       */
+/*   Updated: 2025/05/16 16:52:25 by dimendon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,19 +25,21 @@
 
 typedef struct s_philo
 {
-    int t_id;
-    int tt_die;
-    int tt_eat;
-    int tt_sleep;
-    int max_eat;
-    int ate;
-    long start_time;
-    long last_meal;
-    pthread_t thread;
+    int             t_id;
+    int             tt_die;
+    int             tt_eat;
+    int             tt_sleep;
+    int             max_eat;
+    int             ate;
+    long            start_time;
+    long            last_meal;
+    pthread_t       thread;
     pthread_mutex_t fork;
+    short int       using_fork;
     struct s_philo *next;
+    struct s_philo *previous;
 
-    int *is_dead;
+    int             *is_dead;
     pthread_mutex_t *is_dead_mutex;
     pthread_mutex_t *print_mutex;
 } t_philo;
