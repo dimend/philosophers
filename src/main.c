@@ -6,7 +6,7 @@
 /*   By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/29 15:22:30 by dimendon          #+#    #+#             */
-/*   Updated: 2025/05/16 17:37:11 by dimendon         ###   ########.fr       */
+/*   Updated: 2025/05/19 16:03:03 by dimendon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,19 +58,15 @@ void join_free(t_philo *head_philo, int n_philo)
 
     i = -1;
     current_philo = head_philo;
-
     while (++i < n_philo)
     {
         pthread_join(current_philo->thread, &status);
         current_philo = current_philo->next;
     }
-
     if (head_philo->is_dead_mutex)
         pthread_mutex_destroy(head_philo->is_dead_mutex);
-        
     free(head_philo->is_dead_mutex);
     free(head_philo->is_dead);
-
     i = -1;
     current_philo = head_philo;
     while (++i < n_philo)

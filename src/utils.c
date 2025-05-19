@@ -37,6 +37,7 @@ void safe_print(t_philo *philo, const char *message, long timestamp)
 
 short int take_fork(t_philo *philo)
 {
+
     if (is_anyone_dead(philo))
         return (1);
 
@@ -59,5 +60,3 @@ void start_threading(t_philo *head, int n_philo)
         i++;
     }
 }
-
-

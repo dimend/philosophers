@@ -11,7 +11,7 @@ short int is_anyone_dead(t_philo *philo)
     if (dead == 0)
     {
         death_time = get_time() - philo->last_meal;
-        if (death_time > philo->tt_die)
+        if (death_time >= philo->tt_die)
         {
             safe_print(philo, NULL , death_time);
             dead = 1;
@@ -26,34 +26,19 @@ short int forks(t_philo *philo)
 
     if (philo->t_id % 2 == 0)
         usleep(1000);
-    pthread_mutex_lock(&philo->fork);
+
+    //lock own fork
     timestamp = get_time() - philo->start_time;
-    if (is_anyone_dead(philo))
-    {
-        pthread_mutex_unlock(&philo->fork);
+    if(lock_forks(&philo->fork, philo, &timestamp))
         return (1);
-    }
 
-    safe_print(philo, "has taken a fork", timestamp);
-
+    //check if single philo
     if (philo == philo->next)
-    {
-        safe_print(philo, NULL, timestamp);
-        pthread_mutex_unlock(&philo->fork);
-        return (1);
-    }
+        return (is_single_philo(philo, timestamp));
 
-    philo->next->using_fork = 1;
-    pthread_mutex_lock(&philo->next->fork);
-    timestamp = get_time() - philo->start_time;
-    if (is_anyone_dead(philo))
-    {
-        pthread_mutex_unlock(&philo->fork);
-        pthread_mutex_unlock(&philo->next->fork);
-        philo->next->using_fork = 0;
+    //grab second fork
+    if (grab_fork(philo, &timestamp))
         return (1);
-    }
-    safe_print(philo, "has taken a fork", timestamp);
 
     return (0);
 }
@@ -63,11 +48,10 @@ short int eating(t_philo *philo)
     long start = get_time();
     long end = start + philo->tt_eat;
 
-    if (is_anyone_dead(philo))
-        return (1);
-    safe_print(philo, "is eating", start - philo->start_time);
     philo->ate++;
-    philo->last_meal = get_time();
+    philo->last_meal = start;
+
+    safe_print(philo, "is eating", start - philo->start_time);
     while (get_time() < end)
     {
         if (is_anyone_dead(philo))
@@ -79,20 +63,19 @@ short int eating(t_philo *philo)
 
 short int sleeping(t_philo *philo)
 {
-    long timestamp = get_time() - philo->start_time;
-    long remaining_time = philo->tt_sleep * 1000;
+    long start = get_time();
+    long end = start + philo->tt_sleep;
 
     if (is_anyone_dead(philo))
         return (1);
 
-    safe_print(philo, "is sleeping", timestamp);
-    while (remaining_time > 0)
+    safe_print(philo, "is sleeping", start - philo->start_time);
+    while (get_time() < end)
     {
         if (is_anyone_dead(philo))
             return (1);
 
-        usleep(1000);
-        remaining_time -= 1000;
+        usleep(500);
     }
     return (0);
 }

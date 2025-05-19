@@ -6,7 +6,7 @@
 #    By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/04/16 16:45:02 by dimendon          #+#    #+#              #
-#    Updated: 2025/05/09 16:17:21 by dimendon         ###   ########.fr        #
+#    Updated: 2025/05/19 15:39:59 by dimendon         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -19,6 +19,7 @@ OBJ_PATH = obj/
 SRCS = 	src/main.c \
 		src/validations.c \
 		src/utils.c \
+		src/helpers.c \
 		src/actions.c \
 		src/init.c
 

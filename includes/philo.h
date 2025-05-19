@@ -6,7 +6,7 @@
 /*   By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/09 17:55:15 by dimendon          #+#    #+#             */
-/*   Updated: 2025/05/16 16:52:25 by dimendon         ###   ########.fr       */
+/*   Updated: 2025/05/19 16:57:21 by dimendon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,7 @@
 
 typedef struct s_philo
 {
+    int             n_philo;
     int             t_id;
     int             tt_die;
     int             tt_eat;
@@ -35,7 +36,6 @@ typedef struct s_philo
     long            last_meal;
     pthread_t       thread;
     pthread_mutex_t fork;
-    short int       using_fork;
     struct s_philo *next;
     struct s_philo *previous;
 
@@ -58,5 +58,10 @@ short int   is_anyone_dead(t_philo *philo);
 void        safe_print(t_philo *philo, const char *message, long timestamp);
 void        *routine(void *arg);
 void        start_threading(t_philo *head, int n_philo);
+short int   lock_forks(pthread_mutex_t *fork, t_philo *philo, long *timestamp);
+void        unlock_forks(t_philo *philo);
+short int   is_single_philo(t_philo *philo, long timestamp);
+short int   grab_fork(t_philo *philo, long *timestamp);
+
 
 #endif
