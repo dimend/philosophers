@@ -6,16 +6,21 @@ short int check_params(char **argv)
     int j;
 
     i = 1;
-    while(argv[i] != NULL)
+
+    while (argv[i])
     {
+        if (argv[i] == NULL || argv[i][0] == '\0')
+            return (1);
+
         j = 0;
-        while(argv[i][j] != '\0')
+        while (argv[i][j])
         {
-            if(argv[i][j] < '0' || argv[i][j] > '9')
-                return (1);
+            if (argv[i][j] < '0' || argv[i][j] > '9'
+					|| (argv[i][0] == '0' && argv[i][1] == '\0'))
+				return (1);
             j++;
         }
-        i++;    
+        i++;
     }
     return (0);
 }

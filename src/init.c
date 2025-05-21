@@ -6,7 +6,7 @@
 /*   By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/29 15:24:52 by dimendon          #+#    #+#             */
-/*   Updated: 2025/05/19 18:31:09 by dimendon         ###   ########.fr       */
+/*   Updated: 2025/05/21 19:47:10 by dimendon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,9 @@ void *routine(void *arg)
         }
         else
             break;
-        if ((philo->max_eat != -1 && philo->ate >= philo->max_eat) || sleeping(philo))
+        if (philo->max_eat != -1 && philo->ate >= philo->max_eat)
+            break;
+        if (sleeping(philo) == 1)
             break;
         if (thinking(philo))
             break;

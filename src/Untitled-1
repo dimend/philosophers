@@ -1,33 +1,32 @@
-./philo 1 120 60 60 
-0 1 is thinking
-0 1 has taken a fork
-0 1 died
+# ./philo 1 120 60 60 
+# 0 1 is thinking
+# 0 1 has taken a fork
+# 0 1 died
 
-It has to be 120
+# It has to be 120
 
-
-
-./philo 1 120 60 60 10000000000000000000000000000000
-0 1 is thinking
+# ./philo 1 120 60 60 10000000000000000000000000000000
+# 0 1 is thinking
 
 
-c2r5p12% ./philo "" "" "" "" 
-zsh: segmentation fault (core dumped)  ./philo "" "" "" ""
+# c2r5p12% ./philo "" "" "" "" 
+# zsh: segmentation fault (core dumped)  ./philo "" "" "" ""
 
 
 
- ./philo 2 130 60 60 1 
- Should stop eating at around 120 not 180 after thinking
+#   ./philo 2 130 60 60 1 
+#   Should stop eating at around 120 not 180 after thinking
+#   
 
 
 
- ./philo 200 200 60 60000000
-                    2147483647
- ./philo 200 200 60 0
- blocking mutex
+# ./philo 200 200 60 60000000
+#                     2147483647
+#  ./philo 200 200 60 0
+#  blocking mutex
 
- ./philo 00 00 0 0  
-zsh: segmentation fault (core dumped)  ./philo 00 00 0 0
+#  ./philo 00 00 0 0  
+# zsh: segmentation fault (core dumped)  ./philo 00 00 0 0
 
 
 

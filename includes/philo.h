@@ -6,7 +6,7 @@
 /*   By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/09 17:55:15 by dimendon          #+#    #+#             */
-/*   Updated: 2025/05/19 16:57:21 by dimendon         ###   ########.fr       */
+/*   Updated: 2025/05/21 16:19:47 by dimendon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,13 +55,13 @@ short int   eating(t_philo *philo);
 short int   sleeping(t_philo *philo);
 short int   thinking(t_philo *philo);
 short int   is_anyone_dead(t_philo *philo);
-void        safe_print(t_philo *philo, const char *message, long timestamp);
+void        safe_print(t_philo *philo, const char *message);
 void        *routine(void *arg);
 void        start_threading(t_philo *head, int n_philo);
-short int   lock_forks(pthread_mutex_t *fork, t_philo *philo, long *timestamp);
+short int   lock_forks(pthread_mutex_t *fork, t_philo *philo);
 void        unlock_forks(t_philo *philo);
-short int   is_single_philo(t_philo *philo, long timestamp);
-short int   grab_fork(t_philo *philo, long *timestamp);
+short int   is_single_philo(t_philo *philo);
+short int   grab_fork(t_philo *philo);
 
 
 #endif
