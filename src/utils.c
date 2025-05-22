@@ -29,17 +29,6 @@ void safe_print(t_philo *philo, const char *message)
     pthread_mutex_unlock(philo->print_mutex);
 }
 
-short int take_fork(t_philo *philo)
-{
-    if (is_anyone_dead(philo))
-        return (1);
-
-    if (forks(philo))
-        return (1);
-
-    return (0);
-}
-
 void start_threading(t_philo *head, int n_philo)
 {
     t_philo *philo = head;

@@ -25,18 +25,15 @@ short int is_anyone_dead(t_philo *philo)
     return (dead);
 }
 
-short int forks(t_philo *philo)
+short int take_forks(t_philo *philo)
 {
-    if (philo->t_id % 2 == 0)
-        usleep(1000);
-
-    //lock own fork
-    if(lock_forks(&philo->fork, philo))
-        return (1);
-
     //check if single philo
     if (philo == philo->next)
         return (is_single_philo(philo));
+
+    //lock own fork
+    if(lock_forks(philo))
+        return (1);
 
     //grab second fork
     if (grab_fork(philo))

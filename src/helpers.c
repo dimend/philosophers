@@ -14,7 +14,7 @@
 
 void unlock_forks(t_philo *philo)
 {
-    if (philo->n_philo%2 != 0)
+    if (philo->n_philo%2 == 0)
         pthread_mutex_unlock(&philo->next->fork);
     else
     {
@@ -26,13 +26,12 @@ void unlock_forks(t_philo *philo)
     pthread_mutex_unlock(&philo->fork);
 }
 
-short int lock_forks(pthread_mutex_t *fork, t_philo *philo)
+short int lock_forks(t_philo *philo)
 {        
-    pthread_mutex_lock(fork);
-        
+    pthread_mutex_lock(&philo->fork);
     if (is_anyone_dead(philo))
     {
-        pthread_mutex_unlock(fork);
+        pthread_mutex_unlock(&philo->fork);
         return (1);
     }
     safe_print(philo, "has taken a fork");
@@ -52,16 +51,16 @@ short int grab_fork(t_philo *philo)
     if(is_anyone_dead(philo))
         return (1);
     // check odd or even total ammount
-    if (philo->n_philo % 2 != 0)
+    if (philo->n_philo % 2 == 0)
     {
-        return (lock_forks(&philo->next->fork, philo));
+        return (lock_forks(philo->next));
     }
     else
     {
         //sync between odd or even philos
         if (philo->t_id % 2 == 0)
-            return (lock_forks(&philo->next->fork, philo));
+            return (lock_forks(philo->next));
         else
-            return (lock_forks(&philo->previous->fork, philo));
+            return (lock_forks(philo->previous));
     }
 }

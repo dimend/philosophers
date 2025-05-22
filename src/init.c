@@ -17,9 +17,11 @@ void *routine(void *arg)
     t_philo *philo = (t_philo *)arg;
 
     thinking(philo);
+    if (philo->t_id % 2 != 0)
+        usleep(1000);
     while (!is_anyone_dead(philo))
     {
-        if (!take_fork(philo))
+        if (!take_forks(philo))
         {   
             if (eating(philo))
             {
@@ -29,7 +31,10 @@ void *routine(void *arg)
             unlock_forks(philo);
         }
         else
+        {
+            unlock_forks(philo);
             break;
+        }
         if (philo->max_eat != -1 && philo->ate >= philo->max_eat)
             break;
         if (sleeping(philo) == 1)
