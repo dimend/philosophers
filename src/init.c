@@ -6,7 +6,7 @@
 /*   By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/29 15:24:52 by dimendon          #+#    #+#             */
-/*   Updated: 2025/05/23 19:41:30 by dimendon         ###   ########.fr       */
+/*   Updated: 2025/05/23 21:35:45 by dimendon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,8 @@
 void *routine(void *arg)
 {
     t_philo *philo = (t_philo *)arg;
+
+    philo->last_meal = get_time();
 
     thinking(philo);
     if (philo->t_id % 2 != 0)
