@@ -6,7 +6,7 @@
 /*   By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/29 15:24:52 by dimendon          #+#    #+#             */
-/*   Updated: 2025/05/21 19:47:10 by dimendon         ###   ########.fr       */
+/*   Updated: 2025/05/23 19:41:30 by dimendon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,25 +21,21 @@ void *routine(void *arg)
         usleep(1000);
     while (!is_anyone_dead(philo))
     {
-        if (!take_forks(philo))
-        {   
-            if (eating(philo))
+        if (take_forks(philo) == 0)
+        {
+            if (eating(philo) == 0)
+                unlock_forks(philo);
+            else
             {
                 unlock_forks(philo);
                 break;
             }
-            unlock_forks(philo);
-        }
-        else
-        {
-            unlock_forks(philo);
-            break;
         }
         if (philo->max_eat != -1 && philo->ate >= philo->max_eat)
             break;
-        if (sleeping(philo) == 1)
+        if (sleeping(philo) != 0)
             break;
-        if (thinking(philo))
+        if (thinking(philo) != 0)
             break;
     }
     return (NULL);
@@ -48,7 +44,7 @@ void *routine(void *arg)
 void init_values(t_philo *philo,  int n_philo, char **argv, long start_time)
 {
     philo->n_philo = ft_atoi(argv[1]);
-    philo->t_id = n_philo + 1;
+    philo->t_id = philo->n_philo - n_philo;
     philo->tt_die = ft_atoi(argv[2]);
     philo->tt_eat = ft_atoi(argv[3]);
     philo->tt_sleep = ft_atoi(argv[4]);
@@ -98,10 +94,8 @@ t_philo *init_philos(char **argv, int n_philo, long start_time, pthread_mutex_t 
             prev->next = philo;
             philo->previous = prev;
         }
-
         prev = philo;
     }
-
     if (prev)
     {
         prev->next = head;

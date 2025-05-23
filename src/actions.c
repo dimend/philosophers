@@ -14,30 +14,29 @@ short int is_anyone_dead(t_philo *philo)
         death_time = get_time() - philo->last_meal;
         if (death_time >= philo->tt_die)
         {
-            safe_print(philo, NULL);
             pthread_mutex_lock(philo->is_dead_mutex);
             *(philo->is_dead) = 1;
             pthread_mutex_unlock(philo->is_dead_mutex);
+            safe_print(philo, NULL);
             dead = 1;
         }
     }
-
     return (dead);
 }
 
 short int take_forks(t_philo *philo)
 {
-    //check if single philo
     if (philo == philo->next)
         return (is_single_philo(philo));
 
-    //lock own fork
-    if(lock_forks(philo))
+    if (lock_forks(&philo->fork, philo))
         return (1);
 
-    //grab second fork
-    if (grab_fork(philo))
+    if (lock_forks(&philo->next->fork, philo))
+    {
+        pthread_mutex_unlock(&philo->fork);
         return (1);
+    }
 
     return (0);
 }
@@ -49,6 +48,9 @@ short int eating(t_philo *philo)
 
     philo->ate++;
     philo->last_meal = start;
+
+    if (is_anyone_dead(philo))
+        return (1);
 
     safe_print(philo, "is eating");
     while (get_time() < end)

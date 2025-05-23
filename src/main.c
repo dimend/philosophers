@@ -6,7 +6,7 @@
 /*   By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/29 15:22:30 by dimendon          #+#    #+#             */
-/*   Updated: 2025/05/21 15:31:18 by dimendon         ###   ########.fr       */
+/*   Updated: 2025/05/23 14:43:06 by dimendon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -95,7 +95,7 @@ int main(int argc, char **argv)
     head_philo = NULL;
     if ((argc == 5 || argc == 6) && check_params(argv) == 0)
     {
-        head_philo = init_philos(argv, ft_atoi(argv[1]), start_time, &print_mutex);
+        head_philo = init_philos(argv, ft_atoi(argv[1]), start_time, &print_mutex);  
         start_threading(head_philo, ft_atoi(argv[1]));
         join_free(head_philo, ft_atoi(argv[1]));
     }

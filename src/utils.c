@@ -29,6 +29,7 @@ void safe_print(t_philo *philo, const char *message)
     pthread_mutex_unlock(philo->print_mutex);
 }
 
+
 void start_threading(t_philo *head, int n_philo)
 {
     t_philo *philo = head;
