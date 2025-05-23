@@ -39,7 +39,6 @@ void start_threading(t_philo *head, int n_philo)
     {
         if (pthread_create(&philo->thread, NULL, routine, (void *)philo) != 0)
             error("Thread creation failed");
-        usleep(3000);
         philo = philo->next;
         i++;
     }

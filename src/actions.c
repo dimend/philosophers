@@ -12,7 +12,7 @@ short int is_anyone_dead(t_philo *philo)
 
     if (dead == 0)
     {
-        if (death_time >= philo->tt_die + 5)
+        if (death_time >= philo->tt_die)
         {
             pthread_mutex_lock(philo->is_dead_mutex);
             *(philo->is_dead) = 1;
@@ -31,6 +31,12 @@ short int take_forks(t_philo *philo)
 
     if (philo == philo->next)
         return (is_single_philo(philo));
+
+    if((philo->ate - philo->next->ate) > 1)
+    {
+        usleep(1000);
+    }
+        
 
     if(philo->t_id % 2 == 0)
     {
@@ -100,8 +106,8 @@ short int sleeping(t_philo *philo)
 
 short int thinking(t_philo *philo)
 {
-/*     if(philo->n_philo%2 != 0 && philo->t_id%2 ==0 )
-        usleep(3000); */
+    if(philo->n_philo%2 != 0 && philo->t_id%2 ==0 )
+        usleep(3000);
 
     if (is_anyone_dead(philo))
         return (1);
