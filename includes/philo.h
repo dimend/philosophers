@@ -63,6 +63,7 @@ short int   is_single_philo(t_philo *philo);
 short int   take_forks(t_philo *philo);
 short int   lock_forks(pthread_mutex_t *fork, t_philo *philo);
 void        unlock_forks(t_philo *philo);
+short int   first_last(t_philo *philo);
 
 
 #endif

@@ -14,8 +14,16 @@
 
 void unlock_forks(t_philo *philo)
 {
+    if(philo->n_philo%2 != 0 && philo->t_id == philo->n_philo)
+    {
+        pthread_mutex_unlock(&philo->fork);
+        pthread_mutex_unlock(&philo->next->next->fork);
+    }
+    else
+    {
         pthread_mutex_unlock(&philo->fork);
         pthread_mutex_unlock(&philo->next->fork);
+    }
 }
 
 short int lock_forks(pthread_mutex_t *fork, t_philo *philo)
@@ -39,3 +47,13 @@ short int is_single_philo(t_philo *philo)
     return (1);
 }
 
+short int first_last(t_philo *philo)
+{
+    if(philo->t_id == 1)
+    {
+        if(philo->ate > philo->previous->ate)
+            return (-1);
+    }
+
+    return (1);
+}

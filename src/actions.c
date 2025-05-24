@@ -12,7 +12,7 @@ short int is_anyone_dead(t_philo *philo)
 
     if (dead == 0)
     {
-        if (death_time >= philo->tt_die)
+        if (death_time >= philo->tt_die + 5)
         {
             pthread_mutex_lock(philo->is_dead_mutex);
             *(philo->is_dead) = 1;
@@ -28,25 +28,28 @@ short int take_forks(t_philo *philo)
 {
     pthread_mutex_t *first;
     pthread_mutex_t *second;
+    short int   fork_direction = 1;
 
     if (philo == philo->next)
         return (is_single_philo(philo));
 
-    if((philo->ate - philo->next->ate) > 1)
+    if (philo->n_philo%2 != 0)
     {
-        usleep(1000);
+        if(philo->t_id == philo->n_philo)
+            fork_direction = first_last(philo->next);
+        else
+            fork_direction = first_last(philo);
     }
-        
-
-    if(philo->t_id % 2 == 0)
+    if (fork_direction == 1)
     {
-        first = &philo->fork;
+        first = &philo->fork;              
         second = &philo->next->fork;
-    } else {
-        second = &philo->fork;
-        first = &philo->next->fork;
     }
-
+    if (fork_direction == -1)
+    {
+        first = &philo->fork;              
+        second = &philo->next->next->fork;
+    }
     if (lock_forks(first, philo))
         return (1);
 
@@ -58,6 +61,7 @@ short int take_forks(t_philo *philo)
 
     return (0);
 }
+
 
 short int eating(t_philo *philo)
 {
@@ -106,8 +110,6 @@ short int sleeping(t_philo *philo)
 
 short int thinking(t_philo *philo)
 {
-    if(philo->n_philo%2 != 0 && philo->t_id%2 ==0 )
-        usleep(3000);
 
     if (is_anyone_dead(philo))
         return (1);
