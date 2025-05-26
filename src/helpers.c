@@ -6,7 +6,7 @@
 /*   By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/19 15:39:32 by dimendon          #+#    #+#             */
-/*   Updated: 2025/05/23 18:17:07 by dimendon         ###   ########.fr       */
+/*   Updated: 2025/05/26 20:21:20 by dimendon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,16 +14,8 @@
 
 void unlock_forks(t_philo *philo)
 {
-    if(philo->n_philo%2 != 0 && philo->t_id == philo->n_philo)
-    {
-        pthread_mutex_unlock(&philo->fork);
-        pthread_mutex_unlock(&philo->next->next->fork);
-    }
-    else
-    {
         pthread_mutex_unlock(&philo->fork);
         pthread_mutex_unlock(&philo->next->fork);
-    }
 }
 
 short int lock_forks(pthread_mutex_t *fork, t_philo *philo)
@@ -47,13 +39,21 @@ short int is_single_philo(t_philo *philo)
     return (1);
 }
 
-short int first_last(t_philo *philo)
+short int check_and_update_max_eat(t_philo *philo)
 {
-    if(philo->t_id == 1)
-    {
-        if(philo->ate > philo->previous->ate)
-            return (-1);
-    }
+    if (philo->max_eat == -1 || philo->ate != philo->max_eat)
+        return 0;
 
-    return (1);
+    pthread_mutex_lock(&philo->table->have_eaten_mutex);
+    *(&philo->table->have_eaten) += 1;
+    if (*(&philo->table->have_eaten) == philo->n_philo)
+    {
+        pthread_mutex_lock(&philo->table->is_dead_mutex);
+        *(&philo->table->is_dead) = 1;
+        pthread_mutex_unlock(&philo->table->is_dead_mutex);
+        pthread_mutex_unlock(&philo->table->have_eaten_mutex);
+        return (1);
+    }
+    pthread_mutex_unlock(&philo->table->have_eaten_mutex);
+    return (0);
 }

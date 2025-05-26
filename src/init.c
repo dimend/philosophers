@@ -6,7 +6,7 @@
 /*   By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/29 15:24:52 by dimendon          #+#    #+#             */
-/*   Updated: 2025/05/23 22:18:40 by dimendon         ###   ########.fr       */
+/*   Updated: 2025/05/26 20:12:56 by dimendon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,12 +15,11 @@
 void *routine(void *arg)
 {
     t_philo *philo = (t_philo *)arg;
-
     thinking(philo);
-    if (philo->t_id % 2 != 0)
-        usleep(1000);
-    while (!is_anyone_dead(philo))
-    {
+    if (philo->t_id % 2 == 0)
+        usleep(500 * philo->tt_eat);
+    while (1)
+    {               
         if (take_forks(philo) == 0)
         {
             if (eating(philo) == 0)
@@ -31,7 +30,7 @@ void *routine(void *arg)
                 break;
             }
         }
-        if (philo->max_eat != -1 && philo->ate >= philo->max_eat)
+        if (check_and_update_max_eat(philo))
             break;
         if (sleeping(philo) != 0)
             break;
@@ -41,7 +40,8 @@ void *routine(void *arg)
     return (NULL);
 }
 
-void init_values(t_philo *philo,  int n_philo, char **argv, long start_time)
+
+void init_values(t_philo *philo, int n_philo, char **argv, long start_time, t_table *table)
 {
     philo->n_philo = ft_atoi(argv[1]);
     philo->t_id = philo->n_philo - n_philo;
@@ -50,43 +50,32 @@ void init_values(t_philo *philo,  int n_philo, char **argv, long start_time)
     philo->tt_sleep = ft_atoi(argv[4]);
     philo->start_time = start_time;
     philo->last_meal = start_time;
+
     if (argv[5])
         philo->max_eat = ft_atoi(argv[5]);
     else
         philo->max_eat = -1;
+
     philo->ate = 0;
     pthread_mutex_init(&philo->fork, NULL);
-    
+
+    philo->table = table;
     philo->next = NULL;
     philo->previous = NULL;
 }
 
-t_philo *init_philos(char **argv, int n_philo, long start_time, pthread_mutex_t *print_mutex)
+t_philo *init_philos(char **argv, int n_philo, long start_time, t_table *table)
 {
     t_philo *head = NULL;
     t_philo *prev = NULL;
     t_philo *philo = NULL;
-
-    int *shared_is_dead = malloc(sizeof(int));
-    pthread_mutex_t *shared_mutex = malloc(sizeof(pthread_mutex_t));
-
-    if (!shared_is_dead || !shared_mutex)
-        error("Allocation failed");
-
-    *shared_is_dead = 0;
-    pthread_mutex_init(shared_mutex, NULL);
 
     while (n_philo-- > 0)
     {
         philo = malloc(sizeof(t_philo));
         if (!philo)
             error("Philo malloc fail");
-
-        init_values(philo, n_philo, argv, start_time);
-        philo->print_mutex = print_mutex;
-        philo->is_dead = shared_is_dead;
-        philo->is_dead_mutex = shared_mutex;
-
+        init_values(philo, n_philo, argv, start_time, table);
         if (!head)
             head = philo;
         if (prev)
@@ -101,5 +90,6 @@ t_philo *init_philos(char **argv, int n_philo, long start_time, pthread_mutex_t 
         prev->next = head;
         head->previous = prev;
     }
-    return (head);
+    return head;
 }
+

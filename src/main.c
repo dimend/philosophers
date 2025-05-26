@@ -6,7 +6,7 @@
 /*   By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/29 15:22:30 by dimendon          #+#    #+#             */
-/*   Updated: 2025/05/23 14:43:06 by dimendon         ###   ########.fr       */
+/*   Updated: 2025/05/26 20:35:25 by dimendon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,32 +49,38 @@ A death must be displayed within 10 ms
 
 #include "philo.h"
 
-void join_free(t_philo *head_philo, int n_philo)
+void join_free(t_philo *head_philo, int n_philo, t_table *table)
 {
     int i;
     t_philo *current_philo;
     t_philo *next_philo;
     void *status;
 
-    i = -1;
+    if (!head_philo || !table)
+        return;
+
+    i = 0;
     current_philo = head_philo;
-    while (++i < n_philo)
+    while (i < n_philo)
     {
         pthread_join(current_philo->thread, &status);
         current_philo = current_philo->next;
+        i++;
     }
-    if (head_philo->is_dead_mutex)
-        pthread_mutex_destroy(head_philo->is_dead_mutex);
-    free(head_philo->is_dead_mutex);
-    free(head_philo->is_dead);
-    i = -1;
+
+    pthread_mutex_destroy(&table->is_dead_mutex);
+    pthread_mutex_destroy(&table->have_eaten_mutex);
+    pthread_mutex_destroy(&table->print_mutex);
+
+    i = 0;
     current_philo = head_philo;
-    while (++i < n_philo)
+    while (i < n_philo)
     {
         next_philo = current_philo->next;
         pthread_mutex_destroy(&current_philo->fork);
         free(current_philo);
         current_philo = next_philo;
+        i++;
     }
 }
 
@@ -86,23 +92,30 @@ void error(char *message)
 
 int main(int argc, char **argv)
 {
-    t_philo         *head_philo;
-    long            start_time;
-    pthread_mutex_t print_mutex;
-    
-    pthread_mutex_init(&print_mutex, NULL);
+    t_philo     *head_philo = NULL;
+    t_table     table;
+    long        start_time;
+
+    if (!(argc == 5 || argc == 6) || check_params(argv) != 0)
+    {
+        printf("Usage: ./philo [n_philos] [t_die] [t_eat] [t_sleep] [(optional) max_eat]\n");
+        return (1);
+    }
+
+    table.is_dead = 0;
+    table.have_eaten = 0;
+
+    pthread_mutex_init(&table.print_mutex, NULL);
+    pthread_mutex_init(&table.is_dead_mutex, NULL);
+    pthread_mutex_init(&table.have_eaten_mutex, NULL);
+
     start_time = get_time();
-    head_philo = NULL;
-    if ((argc == 5 || argc == 6) && check_params(argv) == 0)
-    {
-        head_philo = init_philos(argv, ft_atoi(argv[1]), start_time, &print_mutex);  
-        start_threading(head_philo, ft_atoi(argv[1]));
-        join_free(head_philo, ft_atoi(argv[1]));
-    }
-    else
-    {
-        printf("./philo [nbr_of_philosophers] [t_t_die] [t_t_eat] [t_t_sleep] [(optional)[nbr_times_philo_eat]]\n");
-    }
-    
+
+    head_philo = init_philos(argv, ft_atoi(argv[1]), start_time, &table);
+    start_threading(head_philo, ft_atoi(argv[1]));
+    join_free(head_philo, ft_atoi(argv[1]), &table);
+
     return (0);
 }
+
+

@@ -10,12 +10,17 @@ long get_time()
 void safe_print(t_philo *philo, const char *message)
 {
     long timestamp;
+    int dead;
 
-    pthread_mutex_lock(philo->print_mutex);
+    pthread_mutex_lock(&philo->table->print_mutex);
 
-    if (*(philo->is_dead) && message != NULL)
+    pthread_mutex_lock(&philo->table->is_dead_mutex);
+    dead = *(&philo->table->is_dead);
+    pthread_mutex_unlock(&philo->table->is_dead_mutex);
+
+    if (dead && message != NULL)
     {
-        pthread_mutex_unlock(philo->print_mutex);
+        pthread_mutex_unlock(&philo->table->print_mutex);
         return;
     }
 
@@ -26,8 +31,9 @@ void safe_print(t_philo *philo, const char *message)
     else
         printf("%ld %d %s\n", timestamp, philo->t_id, message);
 
-    pthread_mutex_unlock(philo->print_mutex);
+    pthread_mutex_unlock(&philo->table->print_mutex);
 }
+
 
 
 void start_threading(t_philo *head, int n_philo)

@@ -6,7 +6,7 @@
 /*   By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/09 17:55:15 by dimendon          #+#    #+#             */
-/*   Updated: 2025/05/23 18:41:12 by dimendon         ###   ########.fr       */
+/*   Updated: 2025/05/26 20:36:10 by dimendon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,15 @@
 # include <pthread.h>   // pthread_create, pthread_detach, pthread_join
                         // pthread_mutex_init, pthread_mutex_destroy
                         // pthread_mutex_lock, pthread_mutex_unlock
+
+typedef struct s_table
+{
+    int             is_dead;
+    int             have_eaten;
+    pthread_mutex_t print_mutex;
+    pthread_mutex_t is_dead_mutex;
+    pthread_mutex_t have_eaten_mutex;
+} t_table;
 
 typedef struct s_philo
 {
@@ -39,14 +48,12 @@ typedef struct s_philo
     struct s_philo *next;
     struct s_philo *previous;
 
-    int             *is_dead;
-    pthread_mutex_t *is_dead_mutex;
-    pthread_mutex_t *print_mutex;
+    t_table  *table;
 } t_philo;
 
 short int   check_params(char **argv);
 int         ft_atoi(const char *str);
-t_philo     *init_philos(char **argv, int n_philos, long start_time, pthread_mutex_t *print_mutex);
+t_philo     *init_philos(char **argv, int n_philo, long start_time, t_table *table);
 void        error(char *message);
 long        get_time(void);
 
@@ -63,7 +70,6 @@ short int   is_single_philo(t_philo *philo);
 short int   take_forks(t_philo *philo);
 short int   lock_forks(pthread_mutex_t *fork, t_philo *philo);
 void        unlock_forks(t_philo *philo);
-short int   first_last(t_philo *philo);
-
+short int   check_and_update_max_eat(t_philo *philo);
 
 #endif
