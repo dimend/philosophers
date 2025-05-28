@@ -6,7 +6,7 @@
 /*   By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/09 17:55:15 by dimendon          #+#    #+#             */
-/*   Updated: 2025/05/26 20:36:10 by dimendon         ###   ########.fr       */
+/*   Updated: 2025/05/28 16:48:42 by dimendon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,14 +14,12 @@
 # define PHILO_H
 
 # include <unistd.h>
-# include <string.h>    // memset
-# include <stdio.h>     // printf
-# include <stdlib.h>    // malloc, free
-# include <unistd.h>    // write, usleep
-# include <sys/time.h>  // gettimeofday
-# include <pthread.h>   // pthread_create, pthread_detach, pthread_join
-                        // pthread_mutex_init, pthread_mutex_destroy
-                        // pthread_mutex_lock, pthread_mutex_unlock
+# include <string.h>  
+# include <stdio.h> 
+# include <stdlib.h> 
+# include <unistd.h> 
+# include <sys/time.h> 
+# include <pthread.h>   
 
 typedef struct s_table
 {
@@ -54,7 +52,9 @@ typedef struct s_philo
 short int   check_params(char **argv);
 int         ft_atoi(const char *str);
 t_philo     *init_philos(char **argv, int n_philo, long start_time, t_table *table);
-void        error(char *message);
+void        init_values(t_philo *philo, int n_philo, char **argv, long start_time);
+t_philo     *create_philo(int id, char **argv, long start_time, t_table *table);
+t_philo     *init_table(char **argv, long start_time, t_table *table);
 long        get_time(void);
 
 short int   eating(t_philo *philo);
@@ -63,8 +63,8 @@ short int   thinking(t_philo *philo);
 short int   is_anyone_dead(t_philo *philo);
 
 void        safe_print(t_philo *philo, const char *message);
-void        *routine(void *arg);
-void        start_threading(t_philo *head, int n_philo);
+void        routine(void *arg);
+short int   start_threading(t_philo *head, int n_philo);
 short int   is_single_philo(t_philo *philo);
 
 short int   take_forks(t_philo *philo);

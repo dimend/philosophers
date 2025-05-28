@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   actions.c                                          :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/05/28 19:02:37 by dimendon          #+#    #+#             */
+/*   Updated: 2025/05/28 19:02:38 by dimendon         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "philo.h"
 
 short int is_anyone_dead(t_philo *philo)
@@ -22,7 +34,7 @@ short int is_anyone_dead(t_philo *philo)
             dead = 1;
         }
     }
-    return dead;
+    return (dead);
 }
 
 short int take_forks(t_philo *philo)
@@ -48,7 +60,7 @@ short int eating(t_philo *philo)
 
     philo->last_meal = start;
     if (is_anyone_dead(philo))
-        return 1;
+        return (1);
 
     safe_print(philo, "is eating");
     while (get_time() < end)
@@ -61,7 +73,7 @@ short int eating(t_philo *philo)
         usleep(1000);
     }
     philo->ate++;
-    return 0;
+    return (0);
 }
 
 short int sleeping(t_philo *philo)
@@ -70,23 +82,27 @@ short int sleeping(t_philo *philo)
     long end = start + philo->tt_sleep;
 
     if (is_anyone_dead(philo))
-        return 1;
+        return (1);
 
     safe_print(philo, "is sleeping");
     while (get_time() < end)
     {
         if (is_anyone_dead(philo))
-            return 1;
+            return (1);
         usleep(1000);
     }
-    return 0;
+    return (0);
 }
 
 short int thinking(t_philo *philo)
 {
     if (is_anyone_dead(philo))
-        return 1;
+        return (1);
 
     safe_print(philo, "is thinking");
-    return 0;
+    if(philo->n_philo % 2 != 0 && philo->t_id == 1 && philo->ate > 0 && philo->ate > philo->previous->ate)
+        usleep(1000*philo->tt_eat);
+    if(philo->n_philo % 2 != 0 && philo->t_id == philo->n_philo && philo->ate > 0 && philo->ate >= philo->next->ate)
+        usleep(1000*philo->tt_eat);
+    return (0);
 }

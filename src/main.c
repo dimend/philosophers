@@ -6,116 +6,65 @@
 /*   By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/29 15:22:30 by dimendon          #+#    #+#             */
-/*   Updated: 2025/05/26 20:35:25 by dimendon         ###   ########.fr       */
+/*   Updated: 2025/05/28 16:49:05 by dimendon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-/* philosophers take turns eating, thinking, sleeping
-cant eat and think/sleep or vice-versa
-
-theres forks and they are as many as philosophers
-when philosophers eat they need 2 forks
-when they finish eating they put them back and sleep
-when they wake up, they start thinking
-
-the sim stops when one of them dies
-
-a philosopher needs to eat and should never starve
-cant communicate with eachother
-dont know if someone is about to die
-philosophers should avoid dying */
-
-
-/* ARGS
-number_of_philosophers (also forks) - 
-time_to_die (in ms) - if they dont eat in that time they die
-time_to_eat - how long they eat and hold 2 forks
-time_to_sleep
-[number_of_times_each_philosopher_must_eat] (optional) 
-- if all philosphers eat this ammount of time the sim stops */
-
-/* each philospher has a number
-they all sit between philosopher n+1 and n-1 */
-
-/* any state change of a philosopher must be formatted as follows:
-◦ timestamp_in_ms X has taken a fork
-◦ timestamp_in_ms X is eating
-◦ timestamp_in_ms X is sleeping
-◦ timestamp_in_ms X is thinking
-◦ timestamp_in_ms X died
-A displayed state message should not overlap with another message.
-A death must be displayed within 10 ms
-*/
-
 #include "philo.h"
 
-void join_free(t_philo *head_philo, int n_philo, t_table *table)
+void	join_free(t_philo *head_philo, int n_philo, t_table *table)
 {
-    int i;
-    t_philo *current_philo;
-    t_philo *next_philo;
-    void *status;
+	int		i;
+	t_philo	*current_philo;
+	t_philo	*next_philo;
+	void	*status;
 
-    if (!head_philo || !table)
-        return;
-
-    i = 0;
-    current_philo = head_philo;
-    while (i < n_philo)
-    {
-        pthread_join(current_philo->thread, &status);
-        current_philo = current_philo->next;
-        i++;
-    }
-
-    pthread_mutex_destroy(&table->is_dead_mutex);
-    pthread_mutex_destroy(&table->have_eaten_mutex);
-    pthread_mutex_destroy(&table->print_mutex);
-
-    i = 0;
-    current_philo = head_philo;
-    while (i < n_philo)
-    {
-        next_philo = current_philo->next;
-        pthread_mutex_destroy(&current_philo->fork);
-        free(current_philo);
-        current_philo = next_philo;
-        i++;
-    }
+	i = 0;
+	current_philo = head_philo;
+	while (i++ < n_philo)
+	{
+		pthread_join(current_philo->thread, &status);
+		current_philo = current_philo->next;
+	}
+	pthread_mutex_destroy(&table->is_dead_mutex);
+	pthread_mutex_destroy(&table->have_eaten_mutex);
+	pthread_mutex_destroy(&table->print_mutex);
+	i = 0;
+	current_philo = head_philo;
+	while (i++ < n_philo)
+	{
+		next_philo = current_philo->next;
+		pthread_mutex_destroy(&current_philo->fork);
+		free(current_philo);
+		current_philo = next_philo;
+	}
 }
 
-void error(char *message)
+int	main(int argc, char **argv)
 {
-    perror(message);
-    exit(EXIT_FAILURE);
+	t_philo	*head_philo;
+	t_table	table;
+	long	start_time;
+	int		n_threads;
+
+	head_philo = NULL;
+	start_time = get_time();
+	n_threads = 0;
+	if (!(argc == 5 || argc == 6) || check_params(argv) != 0)
+	{
+		printf("./philo [n_philos] [t_die] [t_eat] [t_sleep] [(opt) max_eat]\n");
+		return (1);
+	}
+	head_philo = init_table(argv, start_time, &table);
+	if (head_philo == NULL)
+		return (1);
+	n_threads = start_threading(head_philo, ft_atoi(argv[1]));
+	if (n_threads != ft_atoi(argv[1]))
+	{
+		printf("Thread creation failed %d \n", n_threads);
+		join_free(head_philo, n_threads, &table);
+		return (1);
+	}
+	join_free(head_philo, ft_atoi(argv[1]), &table);
+	return (0);
 }
-
-int main(int argc, char **argv)
-{
-    t_philo     *head_philo = NULL;
-    t_table     table;
-    long        start_time;
-
-    if (!(argc == 5 || argc == 6) || check_params(argv) != 0)
-    {
-        printf("Usage: ./philo [n_philos] [t_die] [t_eat] [t_sleep] [(optional) max_eat]\n");
-        return (1);
-    }
-
-    table.is_dead = 0;
-    table.have_eaten = 0;
-
-    pthread_mutex_init(&table.print_mutex, NULL);
-    pthread_mutex_init(&table.is_dead_mutex, NULL);
-    pthread_mutex_init(&table.have_eaten_mutex, NULL);
-
-    start_time = get_time();
-
-    head_philo = init_philos(argv, ft_atoi(argv[1]), start_time, &table);
-    start_threading(head_philo, ft_atoi(argv[1]));
-    join_free(head_philo, ft_atoi(argv[1]), &table);
-
-    return (0);
-}
-
-
