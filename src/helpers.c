@@ -6,16 +6,16 @@
 /*   By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/19 15:39:32 by dimendon          #+#    #+#             */
-/*   Updated: 2025/05/28 18:00:25 by dimendon         ###   ########.fr       */
+/*   Updated: 2025/05/30 17:47:48 by dimendon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
 
-void unlock_forks(t_philo *philo)
+void	unlock_forks(t_philo *philo)
 {
-    pthread_mutex_unlock(&philo->fork);
-    pthread_mutex_unlock(&philo->next->fork);
+	pthread_mutex_unlock(&philo->fork);
+	pthread_mutex_unlock(&philo->next->fork);
 }
 
 short int	lock_forks(pthread_mutex_t *fork, t_philo *philo)
@@ -56,19 +56,26 @@ short int	check_and_update_max_eat(t_philo *philo)
 	return (0);
 }
 
-t_philo	*create_philo(int id, char **argv, long start_time, t_table *table)
+t_philo	*create_philos_loop(char **argv, long start_time, t_table *table,
+		t_philo **head)
 {
 	t_philo	*philo;
+	int		i;
+	int		n_philo;
 
-	philo = malloc(sizeof(t_philo));
-	if (!philo)
-		return (NULL);
-	init_values(philo, id, argv, start_time);
-	philo->table = table;
-	if (pthread_mutex_init(&philo->fork, NULL) != 0)
+	philo = NULL;
+	n_philo = ft_atoi(argv[1]);
+	i = n_philo;
+	while (i-- > 0)
 	{
-		free(philo);
-		return (NULL);
+		philo = create_philo(i, argv, start_time, table);
+		if (!philo)
+		{
+			cleanup(*head, n_philo - i - 1, table, 0);
+			return (NULL);
+		}
+		if (!*head)
+			*head = philo;
 	}
 	return (philo);
 }

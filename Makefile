@@ -6,12 +6,12 @@
 #    By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/04/16 16:45:02 by dimendon          #+#    #+#              #
-#    Updated: 2025/05/23 18:41:15 by dimendon         ###   ########.fr        #
+#    Updated: 2025/05/30 16:28:07 by dimendon         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 CC = cc
-CFLAGS = -Wall -Wextra -Werror -g -I./includes
+CFLAGS = -Wall -Wextra -Werror -g2 -I./includes
 
 TARGET = philo
 OBJ_PATH = obj/

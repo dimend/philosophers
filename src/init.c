@@ -6,7 +6,7 @@
 /*   By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/29 15:24:52 by dimendon          #+#    #+#             */
-/*   Updated: 2025/05/28 18:42:24 by dimendon         ###   ########.fr       */
+/*   Updated: 2025/05/30 17:46:48 by dimendon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,14 +18,7 @@ void	routine(void *arg)
 
 	philo = (t_philo *)arg;
 	thinking(philo);
-	if(philo->t_id != 1 && philo->n_philo%2 != 0)
-	{
-		if (philo->t_id % 2 == 0)
-			usleep( (1000 * philo->tt_eat)+500 );
-		else
-			usleep(1000*philo->tt_eat);
-	}
-	else if(philo->t_id%2 == 0)
+	if (philo->t_id % 2 == 0)
 		usleep(500 * philo->tt_eat);
 	while (1)
 	{
@@ -52,16 +45,28 @@ t_philo	*init_table(char **argv, long start_time, t_table *table)
 {
 	t_philo	*head_philo;
 
-	head_philo = NULL;
 	table->is_dead = 0;
 	table->have_eaten = 0;
 	if (pthread_mutex_init(&table->print_mutex, NULL) != 0)
 		return (NULL);
 	if (pthread_mutex_init(&table->is_dead_mutex, NULL) != 0)
+	{
+		pthread_mutex_destroy(&table->print_mutex);
 		return (NULL);
+	}
 	if (pthread_mutex_init(&table->have_eaten_mutex, NULL) != 0)
+	{
+		pthread_mutex_destroy(&table->print_mutex);
+		pthread_mutex_destroy(&table->is_dead_mutex);
 		return (NULL);
+	}
 	head_philo = init_philos(argv, ft_atoi(argv[1]), start_time, table);
+	if (!head_philo)
+	{
+		pthread_mutex_destroy(&table->print_mutex);
+		pthread_mutex_destroy(&table->is_dead_mutex);
+		pthread_mutex_destroy(&table->have_eaten_mutex);
+	}
 	return (head_philo);
 }
 
@@ -80,39 +85,34 @@ void	init_values(t_philo *philo, int n_philo, char **argv, long start_time)
 		philo->max_eat = -1;
 	philo->ate = 0;
 	philo->next = NULL;
-	philo->previous = NULL;
 }
 
 t_philo	*init_philos(char **argv, int n_philo, long start_time, t_table *table)
 {
 	t_philo	*head;
-	t_philo	*prev;
 	t_philo	*philo;
 	int		i;
+	t_philo	*new;
 
 	head = NULL;
-	prev = NULL;
 	philo = NULL;
 	i = n_philo;
 	while (i-- > 0)
 	{
-		philo = create_philo(i, argv, start_time, table);
-		if (!philo)
-			return (NULL);
-		if (!head)
-			head = philo;
-		if (prev)
+		new = create_philo(i, argv, start_time, table);
+		if (!new)
 		{
-			prev->next = philo;
-			philo->previous = prev;
+			cleanup(head, n_philo - i - 1, table, 0);
+			return (NULL);
 		}
-		prev = philo;
+		if (!head)
+			head = new;
+		else
+			philo->next = new;
+		philo = new;
 	}
-	if (prev && head)
-	{
-		prev->next = head;
-		head->previous = prev;
-	}
+	if (philo && head)
+		philo->next = head;
 	return (head);
 }
 
@@ -127,7 +127,11 @@ short int	start_threading(t_philo *head, int n_philo)
 	{
 		if (pthread_create(&philo->thread, NULL, (void *)routine,
 				(void *)philo) != 0)
-			return (i);
+		{
+			printf("Thread creation failed\n");
+			cleanup(head, i, philo->table, 1);
+			return (-1);
+		}
 		philo = philo->next;
 		i++;
 	}

@@ -6,39 +6,27 @@
 /*   By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/29 15:22:30 by dimendon          #+#    #+#             */
-/*   Updated: 2025/05/28 16:49:05 by dimendon         ###   ########.fr       */
+/*   Updated: 2025/05/30 17:49:33 by dimendon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
 
-void	join_free(t_philo *head_philo, int n_philo, t_table *table)
+/* void set_previous_fork(t_philo *philo)
 {
-	int		i;
-	t_philo	*current_philo;
-	t_philo	*next_philo;
-	void	*status;
+	int i;
+	t_philo *current;
 
-	i = 0;
-	current_philo = head_philo;
-	while (i++ < n_philo)
+	current = philo;
+	i = philo->n_philo;
+	
+    while (i > 0)
 	{
-		pthread_join(current_philo->thread, &status);
-		current_philo = current_philo->next;
+		current->next->previous_fork = &current->fork;
+		i--;
+		current = current->next;
 	}
-	pthread_mutex_destroy(&table->is_dead_mutex);
-	pthread_mutex_destroy(&table->have_eaten_mutex);
-	pthread_mutex_destroy(&table->print_mutex);
-	i = 0;
-	current_philo = head_philo;
-	while (i++ < n_philo)
-	{
-		next_philo = current_philo->next;
-		pthread_mutex_destroy(&current_philo->fork);
-		free(current_philo);
-		current_philo = next_philo;
-	}
-}
+} */
 
 int	main(int argc, char **argv)
 {
@@ -48,7 +36,7 @@ int	main(int argc, char **argv)
 	int		n_threads;
 
 	head_philo = NULL;
-	start_time = get_time();
+	start_time = get_time(NULL);
 	n_threads = 0;
 	if (!(argc == 5 || argc == 6) || check_params(argv) != 0)
 	{
@@ -58,13 +46,10 @@ int	main(int argc, char **argv)
 	head_philo = init_table(argv, start_time, &table);
 	if (head_philo == NULL)
 		return (1);
+	set_previous_fork(head_philo);
 	n_threads = start_threading(head_philo, ft_atoi(argv[1]));
-	if (n_threads != ft_atoi(argv[1]))
-	{
-		printf("Thread creation failed %d \n", n_threads);
-		join_free(head_philo, n_threads, &table);
+	if (n_threads == -1)
 		return (1);
-	}
-	join_free(head_philo, ft_atoi(argv[1]), &table);
+	cleanup(head_philo, ft_atoi(argv[1]), &table, 1);
 	return (0);
 }
