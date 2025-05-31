@@ -6,7 +6,7 @@
 /*   By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/28 14:33:21 by dimendon          #+#    #+#             */
-/*   Updated: 2025/05/28 14:33:22 by dimendon         ###   ########.fr       */
+/*   Updated: 2025/05/31 23:14:22 by dimendon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,7 @@ short int	check_params(char **argv)
 	return (0);
 }
 
-int	ft_atoi(const char *str)
+long	ft_atoi(const char *str)
 {
 	int	ret;
 	int	sign;

@@ -6,7 +6,7 @@
 /*   By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/29 15:24:52 by dimendon          #+#    #+#             */
-/*   Updated: 2025/05/30 17:46:48 by dimendon         ###   ########.fr       */
+/*   Updated: 2025/05/31 22:01:14 by dimendon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@ void	routine(void *arg)
 	philo = (t_philo *)arg;
 	thinking(philo);
 	if (philo->t_id % 2 == 0)
-		usleep(500 * philo->tt_eat);
+		usleep(1000);
 	while (1)
 	{
 		if (take_forks(philo) == 0)
@@ -83,6 +83,7 @@ void	init_values(t_philo *philo, int n_philo, char **argv, long start_time)
 		philo->max_eat = ft_atoi(argv[5]);
 	else
 		philo->max_eat = -1;
+	philo->using_fork = 0;
 	philo->ate = 0;
 	philo->next = NULL;
 }

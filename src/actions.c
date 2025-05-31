@@ -6,7 +6,7 @@
 /*   By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/28 19:02:37 by dimendon          #+#    #+#             */
-/*   Updated: 2025/05/30 17:47:25 by dimendon         ###   ########.fr       */
+/*   Updated: 2025/05/31 23:05:10 by dimendon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,13 +39,19 @@ short int	take_forks(t_philo *philo)
 {
 	if (philo == philo->next)
 		return (is_single_philo(philo));
-	if (lock_forks(&philo->fork, philo))
-		return (1);
-	if (lock_forks(&philo->next->fork, philo))
+	while (!try_take_fork(philo))
 	{
-		pthread_mutex_unlock(&philo->fork);
-		return (1);
+		usleep(1000);
 	}
+	safe_print(philo, "has taken a fork");
+	while (!try_take_fork(philo->next))
+	{
+		pthread_mutex_lock(&philo->fork);
+		philo->using_fork = 0;
+		pthread_mutex_unlock(&philo->fork);
+		usleep(1000);
+	}
+	safe_print(philo, "has taken a fork");
 	return (0);
 }
 
@@ -58,6 +64,7 @@ short int	eating(t_philo *philo)
 	end = start + philo->tt_eat;
 	if (is_anyone_dead(philo))
 		return (1);
+	philo->last_meal = get_time(philo);
 	safe_print(philo, "is eating");
 	while (get_time(philo) < end)
 	{
@@ -66,9 +73,8 @@ short int	eating(t_philo *philo)
 			unlock_forks(philo);
 			return (1);
 		}
-		usleep(1000);
+		usleep(500);
 	}
-	philo->last_meal = get_time(philo);
 	philo->ate++;
 	return (0);
 }
@@ -87,7 +93,7 @@ short int	sleeping(t_philo *philo)
 	{
 		if (is_anyone_dead(philo))
 			return (1);
-		usleep(1000);
+		usleep(500);
 	}
 	return (0);
 }
@@ -97,7 +103,7 @@ short int	thinking(t_philo *philo)
 	if (is_anyone_dead(philo))
 		return (1);
 	safe_print(philo, "is thinking");
-	if (philo->n_philo % 2 != 0 && philo->t_id % 2 == 0 && philo->ate > 0)
-		usleep(500 * philo->tt_eat);
+	if (philo->n_philo % 2 != 0 && philo->ate > 0)
+		usleep(5000);
 	return (0);
 }

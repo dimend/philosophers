@@ -6,7 +6,7 @@
 /*   By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/19 15:39:32 by dimendon          #+#    #+#             */
-/*   Updated: 2025/05/30 17:47:48 by dimendon         ###   ########.fr       */
+/*   Updated: 2025/05/31 23:07:52 by dimendon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,27 +14,40 @@
 
 void	unlock_forks(t_philo *philo)
 {
+	pthread_mutex_lock(&philo->fork);
+	philo->using_fork = 0;
 	pthread_mutex_unlock(&philo->fork);
+	pthread_mutex_lock(&philo->next->fork);
+	philo->next->using_fork = 0;
 	pthread_mutex_unlock(&philo->next->fork);
 }
 
-short int	lock_forks(pthread_mutex_t *fork, t_philo *philo)
+short int	try_take_fork(t_philo *philo)
 {
-	if (!is_anyone_dead(philo))
-		pthread_mutex_lock(fork);
-	if (is_anyone_dead(philo))
+	short int	success;
+
+	success = 0;
+	pthread_mutex_lock(&philo->fork);
+	if (philo->using_fork == 0)
 	{
-		pthread_mutex_unlock(fork);
-		return (1);
+		philo->using_fork = 1;
+		success = 1;
 	}
-	safe_print(philo, "has taken a fork");
-	return (0);
+	else
+	{
+		success = 0;
+	}
+	pthread_mutex_unlock(&philo->fork);
+	return (success);
 }
 
 short int	is_single_philo(t_philo *philo)
 {
 	usleep(1000 * philo->tt_die);
-	safe_print(philo, "died");
+	pthread_mutex_lock(&philo->table->is_dead_mutex);
+	philo->table->is_dead = 1;
+	pthread_mutex_unlock(&philo->table->is_dead_mutex);
+	safe_print(philo, NULL);
 	return (1);
 }
 

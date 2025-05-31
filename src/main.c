@@ -6,27 +6,11 @@
 /*   By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/29 15:22:30 by dimendon          #+#    #+#             */
-/*   Updated: 2025/05/30 17:49:33 by dimendon         ###   ########.fr       */
+/*   Updated: 2025/05/31 21:57:57 by dimendon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
-
-/* void set_previous_fork(t_philo *philo)
-{
-	int i;
-	t_philo *current;
-
-	current = philo;
-	i = philo->n_philo;
-	
-    while (i > 0)
-	{
-		current->next->previous_fork = &current->fork;
-		i--;
-		current = current->next;
-	}
-} */
 
 int	main(int argc, char **argv)
 {
@@ -46,7 +30,6 @@ int	main(int argc, char **argv)
 	head_philo = init_table(argv, start_time, &table);
 	if (head_philo == NULL)
 		return (1);
-	set_previous_fork(head_philo);
 	n_threads = start_threading(head_philo, ft_atoi(argv[1]));
 	if (n_threads == -1)
 		return (1);
