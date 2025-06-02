@@ -6,7 +6,7 @@
 /*   By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/28 14:33:21 by dimendon          #+#    #+#             */
-/*   Updated: 2025/05/31 23:14:22 by dimendon         ###   ########.fr       */
+/*   Updated: 2025/06/02 20:00:01 by dimendon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,7 @@ short int	check_params(char **argv)
 	return (0);
 }
 
-long	ft_atoi(const char *str)
+int	ft_atoi(const char *str)
 {
 	int	ret;
 	int	sign;
@@ -58,4 +58,14 @@ long	ft_atoi(const char *str)
 		i++;
 	}
 	return (ret * sign);
+}
+
+void	routine_wait(t_philo *philo)
+{
+	pthread_mutex_lock(&philo->table->print_mutex);
+	pthread_mutex_unlock(&philo->table->print_mutex);
+	pthread_mutex_lock(&philo->meal_mutex);
+	philo->last_meal = get_time(philo);
+	pthread_mutex_unlock(&philo->meal_mutex);
+	thinking(philo);
 }

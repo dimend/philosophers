@@ -6,7 +6,7 @@
 /*   By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/29 15:24:52 by dimendon          #+#    #+#             */
-/*   Updated: 2025/05/31 22:01:14 by dimendon         ###   ########.fr       */
+/*   Updated: 2025/06/02 20:43:10 by dimendon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,9 +17,9 @@ void	routine(void *arg)
 	t_philo	*philo;
 
 	philo = (t_philo *)arg;
-	thinking(philo);
+	routine_wait(philo);
 	if (philo->t_id % 2 == 0)
-		usleep(1000);
+		usleep(2000);
 	while (1)
 	{
 		if (take_forks(philo) == 0)
@@ -27,18 +27,15 @@ void	routine(void *arg)
 			if (eating(philo) == 0)
 				unlock_forks(philo);
 			else
-			{
-				unlock_forks(philo);
 				break ;
-			}
 		}
-		if (check_and_update_max_eat(philo))
-			break ;
 		if (sleeping(philo) != 0)
 			break ;
 		if (thinking(philo) != 0)
 			break ;
 	}
+	if (philo->using_fork == 1)
+		pthread_mutex_unlock(&philo->fork);
 }
 
 t_philo	*init_table(char **argv, long start_time, t_table *table)
@@ -83,9 +80,9 @@ void	init_values(t_philo *philo, int n_philo, char **argv, long start_time)
 		philo->max_eat = ft_atoi(argv[5]);
 	else
 		philo->max_eat = -1;
-	philo->using_fork = 0;
 	philo->ate = 0;
 	philo->next = NULL;
+	philo->using_fork = 0;
 }
 
 t_philo	*init_philos(char **argv, int n_philo, long start_time, t_table *table)
@@ -117,24 +114,30 @@ t_philo	*init_philos(char **argv, int n_philo, long start_time, t_table *table)
 	return (head);
 }
 
-short int	start_threading(t_philo *head, int n_philo)
+short int	start_threading(t_philo *head, int n_philo, t_table *table)
 {
 	t_philo	*philo;
-	int		i;
 
 	philo = head;
-	i = 0;
-	while (i < n_philo)
+	pthread_mutex_lock(&philo->table->print_mutex);
+	while (n_philo-- > 0)
 	{
 		if (pthread_create(&philo->thread, NULL, (void *)routine,
 				(void *)philo) != 0)
 		{
 			printf("Thread creation failed\n");
-			cleanup(head, i, philo->table, 1);
+			cleanup(head, philo->n_philo - n_philo - 1, philo->table, 1);
 			return (-1);
 		}
 		philo = philo->next;
-		i++;
 	}
-	return (i);
+	pthread_mutex_unlock(&philo->table->print_mutex);
+	if (pthread_create(&table->death_monitor_thread, NULL, death_monitor,
+			(void *)table) != 0)
+	{
+		printf("Failed to create death monitor thread\n");
+		join_threads(head, head->n_philo);
+		return (-1);
+	}
+	return (head->n_philo);
 }

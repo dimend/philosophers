@@ -6,7 +6,7 @@
 /*   By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/28 14:33:18 by dimendon          #+#    #+#             */
-/*   Updated: 2025/05/31 21:07:02 by dimendon         ###   ########.fr       */
+/*   Updated: 2025/06/02 20:07:59 by dimendon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,7 @@ void	safe_print(t_philo *philo, const char *message)
 
 	pthread_mutex_lock(&philo->table->print_mutex);
 	pthread_mutex_lock(&philo->table->is_dead_mutex);
-	dead = *(&philo->table->is_dead);
+	dead = philo->table->is_dead;
 	pthread_mutex_unlock(&philo->table->is_dead_mutex);
 	if (dead && message != NULL)
 	{
@@ -53,9 +53,9 @@ void	safe_print(t_philo *philo, const char *message)
 	}
 	timestamp = get_time(philo) - philo->start_time;
 	if (message == NULL)
-		printf("%ld %d died\n", timestamp, philo->t_id);
+		printf("%ld %d died\n", timestamp, philo->t_id + 1);
 	else
-		printf("%ld %d %s\n", timestamp, philo->t_id, message);
+		printf("%ld %d %s\n", timestamp, philo->t_id + 1, message);
 	pthread_mutex_unlock(&philo->table->print_mutex);
 }
 
@@ -82,18 +82,20 @@ void	cleanup(t_philo *head_philo, int n_philo, t_table *table,
 	t_philo	*current;
 	t_philo	*next;
 
-	current = head_philo;
-	i = 0;
 	if (join_threads_flag)
+	{
 		join_threads(head_philo, n_philo);
+		pthread_join(table->death_monitor_thread, NULL);
+	}
 	pthread_mutex_destroy(&table->is_dead_mutex);
 	pthread_mutex_destroy(&table->have_eaten_mutex);
 	pthread_mutex_destroy(&table->print_mutex);
-	i = 0;
 	current = head_philo;
+	i = 0;
 	while (i < n_philo)
 	{
 		pthread_mutex_destroy(&current->fork);
+		pthread_mutex_destroy(&current->meal_mutex);
 		next = current->next;
 		free(current);
 		current = next;
@@ -108,11 +110,17 @@ t_philo	*create_philo(int id, char **argv, long start_time, t_table *table)
 	philo = malloc(sizeof(t_philo));
 	if (!philo)
 		return (NULL);
-	init_values(philo, id, argv, start_time);
+	init_values(philo, id + 1, argv, start_time);
 	philo->table = table;
 	if (pthread_mutex_init(&philo->fork, NULL) != 0)
 	{
-		printf("Philo creation failed");
+		free(philo);
+		return (NULL);
+	}
+	if (pthread_mutex_init(&philo->meal_mutex, NULL) != 0)
+	{
+		pthread_mutex_destroy(&philo->fork);
+		free(philo);
 		return (NULL);
 	}
 	return (philo);

@@ -6,7 +6,7 @@
 /*   By: dimendon <dimendon@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/19 15:39:32 by dimendon          #+#    #+#             */
-/*   Updated: 2025/05/31 23:07:52 by dimendon         ###   ########.fr       */
+/*   Updated: 2025/06/02 20:56:28 by dimendon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,59 +14,30 @@
 
 void	unlock_forks(t_philo *philo)
 {
-	pthread_mutex_lock(&philo->fork);
-	philo->using_fork = 0;
 	pthread_mutex_unlock(&philo->fork);
-	pthread_mutex_lock(&philo->next->fork);
-	philo->next->using_fork = 0;
+	philo->using_fork = 0;
 	pthread_mutex_unlock(&philo->next->fork);
 }
 
-short int	try_take_fork(t_philo *philo)
+short int	lock_forks(pthread_mutex_t *fork, t_philo *philo)
 {
-	short int	success;
-
-	success = 0;
-	pthread_mutex_lock(&philo->fork);
-	if (philo->using_fork == 0)
+	if (is_anyone_dead(philo))
+		return (1);
+	pthread_mutex_lock(fork);
+	if (is_anyone_dead(philo))
 	{
-		philo->using_fork = 1;
-		success = 1;
+		pthread_mutex_unlock(fork);
+		return (1);
 	}
-	else
-	{
-		success = 0;
-	}
-	pthread_mutex_unlock(&philo->fork);
-	return (success);
+	safe_print(philo, "has taken a fork");
+	philo->using_fork = 1;
+	return (0);
 }
 
 short int	is_single_philo(t_philo *philo)
 {
 	usleep(1000 * philo->tt_die);
-	pthread_mutex_lock(&philo->table->is_dead_mutex);
-	philo->table->is_dead = 1;
-	pthread_mutex_unlock(&philo->table->is_dead_mutex);
-	safe_print(philo, NULL);
 	return (1);
-}
-
-short int	check_and_update_max_eat(t_philo *philo)
-{
-	if (philo->max_eat == -1 || philo->ate != philo->max_eat)
-		return (0);
-	pthread_mutex_lock(&philo->table->have_eaten_mutex);
-	*(&philo->table->have_eaten) += 1;
-	if (*(&philo->table->have_eaten) == philo->n_philo)
-	{
-		pthread_mutex_lock(&philo->table->is_dead_mutex);
-		*(&philo->table->is_dead) = 1;
-		pthread_mutex_unlock(&philo->table->is_dead_mutex);
-		pthread_mutex_unlock(&philo->table->have_eaten_mutex);
-		return (1);
-	}
-	pthread_mutex_unlock(&philo->table->have_eaten_mutex);
-	return (0);
 }
 
 t_philo	*create_philos_loop(char **argv, long start_time, t_table *table,
